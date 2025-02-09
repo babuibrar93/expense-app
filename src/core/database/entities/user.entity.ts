@@ -1,5 +1,4 @@
 import { Exclude } from 'class-transformer';
-import { EAuthProvider } from 'src/common/types/provider.enum';
 import { ROLE } from 'src/common/types/roles.enum';
 import { Column, Entity, Index } from 'typeorm';
 import { BaseEntity } from './base.entity';
@@ -16,14 +15,6 @@ export class UserEntity extends BaseEntity {
   @Exclude() // Exclude password from API responses
   @Column({ type: 'varchar', length: 255, nullable: true })
   Password: string;
-
-  @Exclude()
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  ProviderId: string;
-
-  @Exclude()
-  @Column({ type: 'varchar', enum: EAuthProvider, default: EAuthProvider.LOCAL })
-  Provider: string;
 
   @Column({
     type: 'varchar',

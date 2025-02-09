@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-github2';
-import { EAuthProvider } from 'src/common/types/provider.enum';
 import { AuthService } from '../auth.service';
 import { IOAuthUser } from '../interfaces/auth.interface';
 
@@ -32,7 +31,6 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
       id,
       emails: emails[0].value,
       displayName,
-      provider: EAuthProvider.GITHUB,
     };
 
     const savedUser = await this.authService.validateSocialLogin(user);

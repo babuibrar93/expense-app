@@ -4,7 +4,6 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { AuthService } from '../auth.service';
 import { IOAuthUser } from '../interfaces/auth.interface';
-import { EAuthProvider } from 'src/common/types/provider.enum';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
@@ -32,7 +31,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       id,
       emails: emails[0].value,
       displayName,
-      provider: EAuthProvider.GOOGLE,
     };
 
     const savedUser = await this.authService.validateSocialLogin(user);

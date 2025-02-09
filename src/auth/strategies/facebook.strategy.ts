@@ -34,7 +34,6 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
       id,
       emails: emails[0].value,
       displayName: `${name.givenName} ${name.familyName}`,
-      provider: EAuthProvider.FACEBOOK,
     };
 
     const savedUser = await this.authService.validateSocialLogin(user);

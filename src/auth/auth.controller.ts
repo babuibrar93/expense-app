@@ -5,9 +5,7 @@ import {
   Get,
   HttpStatus,
   Post,
-  Query,
   Req,
-  Res,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -18,7 +16,6 @@ import { AuthenticatedRequest } from 'src/common/types/request.interface';
 import { UserEntity } from 'src/core/database/entities/user.entity';
 import { AuthService } from './auth.service';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
-import { Response } from 'express';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -80,15 +77,5 @@ export class AuthController {
   @ApiOperation({ summary: 'GitHub auth callback' })
   async githubAuthRedirect(@Req() req: AuthenticatedRequest) {
     return new ApiResponse(true, HttpStatus.OK, 'Github authentication successful', req.user);
-  }
-
-  @Get('auth0/callback')
-  async callback(@Query('code') code: string, @Res() res: Response) {
-    try {
-      const accessToken = await this.authService.getAccessToken(code);
-      const userInfo = await this.authService.getUserInfo(accessToken);
-    } catch (error) {
-      res.status(500).send('Authentication failed');
-    }
   }
 }

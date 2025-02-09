@@ -8,7 +8,6 @@ export interface IOAuthUser {
   id: string;
   displayName: string;
   // avatar: string;
-  provider: string;
   emails: IEmails | string;
 }
 

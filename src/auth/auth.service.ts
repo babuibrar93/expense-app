@@ -1,6 +1,4 @@
 import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import axios from 'axios';
 import { AuthErrors } from 'src/common/constants/auth.errors';
 import { UserRepository } from 'src/common/repositories/user.repository';
 import { UserEntity } from 'src/core/database/entities/user.entity';
@@ -9,19 +7,7 @@ import { ILoginResponse, IOAuthUser } from './interfaces/auth.interface';
 
 @Injectable()
 export class AuthService {
-  private auth0Domain: string;
-  private clientId: string;
-  private clientSecret: string;
-  private redirectUri: string;
-  constructor(
-    private readonly userRepository: UserRepository,
-    private readonly configService: ConfigService
-  ) {
-    this.auth0Domain = this.configService.get<string>('AUTH0_DOMAIN');
-    this.clientId = this.configService.get<string>('AUTH0_CLIENT_ID');
-    this.clientSecret = this.configService.get<string>('AUTH0_CLIENT_SECRET');
-    this.redirectUri = this.configService.get<string>('AUTH0_CALLBACK_URL');
-  }
+  constructor(private readonly userRepository: UserRepository) {}
 
   /**
    * Handles user registration.
@@ -75,7 +61,7 @@ export class AuthService {
    * @returns {ILoginResponse} Returns the user data along with the generated access token.
    */
   async validateSocialLogin(socialUser: IOAuthUser): Promise<ILoginResponse> {
-    const { emails, id, provider, displayName } = socialUser;
+    const { emails, id, displayName } = socialUser;
 
     if (!id || !emails) throw new Error(AuthErrors.INVALID_OAUTH);
 
@@ -86,48 +72,11 @@ export class AuthService {
 
     if (!user) {
       user = await this.userRepository.saveEntity({
-        ProviderId: id,
         Email: emails,
         FullName: displayName || '',
-        Provider: provider,
       } as unknown as UserEntity);
     } else return { user, token };
 
     return { user, token };
-  }
-
-  // Exchange the authorization code for an access token
-  async getAccessToken(code: string): Promise<string> {
-    try {
-      const response = await axios.post(
-        `https://${this.auth0Domain}/oauth/token`,
-        {
-          grant_type: 'authorization_code',
-          client_id: this.clientId,
-          client_secret: this.clientSecret,
-          code,
-          redirect_uri: this.redirectUri,
-          scope: 'openid profile email', // Make sure this includes 'email' scope,
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      const { access_token } = response.data;
-      return access_token;
-    } catch (error) {}
-  }
-
-  // Fetch user info using the access token
-  async getUserInfo(accessToken: string): Promise<any> {
-    const response = await axios.get(`https://${this.auth0Domain}/userinfo`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-
-    return response.data;
   }
 }
