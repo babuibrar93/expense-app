@@ -4,10 +4,18 @@ import { UserRepository } from 'src/common/repositories/user.repository';
 import { UserEntity } from 'src/core/database/entities/user.entity';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
 import { ILoginResponse, IOAuthUser } from './interfaces/auth.interface';
+import axios from 'axios';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly userRepository: UserRepository) {}
+  private auth0Domain;
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly configService: ConfigService
+  ) {
+    this.auth0Domain = configService.get<string>('AUTH0_DOMAIN');
+  }
 
   /**
    * Handles user registration.
@@ -76,6 +84,34 @@ export class AuthService {
         FullName: displayName || '',
       } as unknown as UserEntity);
     } else return { user, token };
+
+    return { user, token };
+  }
+
+  /**
+   * Validates and handles social login, checks if user exists, and saves the new user if necessary.
+   *
+   * @param accessToken The accessToken obtained from the auth0 provider.
+   * @returns {ILoginResponse} Returns the user data along with the generated access token.
+   */
+  async validateOAuthLogin(accessToken: string): Promise<ILoginResponse> {
+    // Fetch user data from Auth0
+    const auth0Response = await axios.get(`https://${this.auth0Domain}/userinfo`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
+    const { email, name } = auth0Response.data;
+
+    let user = await this.userRepository.findByField('Email', email);
+
+    if (!user) {
+      user = await this.userRepository.saveEntity({
+        Email: email,
+        FullName: name || '',
+      } as unknown as UserEntity);
+    }
+
+    const token = await this.userRepository.generateAccessToken(user);
 
     return { user, token };
   }
