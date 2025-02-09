@@ -1,11 +1,11 @@
 import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import axios from 'axios';
 import { AuthErrors } from 'src/common/constants/auth.errors';
 import { UserRepository } from 'src/common/repositories/user.repository';
 import { UserEntity } from 'src/core/database/entities/user.entity';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
-import { ILoginResponse, IOAuthUser } from './interfaces/auth.interface';
-import axios from 'axios';
-import { ConfigService } from '@nestjs/config';
+import { ILoginResponse } from './interfaces/auth.interface';
 
 @Injectable()
 export class AuthService {
@@ -60,32 +60,6 @@ export class AuthService {
 
     const savedUser = await this.userRepository.findById(user?.Id);
     return { user: savedUser, token };
-  }
-
-  /**
-   * Validates and handles social login, checks if user exists, and saves the new user if necessary.
-   *
-   * @param socialUser The user information obtained from the social login provider (e.g., Facebook, Google).
-   * @returns {ILoginResponse} Returns the user data along with the generated access token.
-   */
-  async validateSocialLogin(socialUser: IOAuthUser): Promise<ILoginResponse> {
-    const { emails, id, displayName } = socialUser;
-
-    if (!id || !emails) throw new Error(AuthErrors.INVALID_OAUTH);
-
-    let user = await this.userRepository.findOneByFields({ Email: String(emails) });
-
-    const token = await this.userRepository.generateAccessToken(user);
-    user = await this.userRepository.findById(user?.Id);
-
-    if (!user) {
-      user = await this.userRepository.saveEntity({
-        Email: emails,
-        FullName: displayName || '',
-      } as unknown as UserEntity);
-    } else return { user, token };
-
-    return { user, token };
   }
 
   /**

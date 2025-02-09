@@ -7,11 +7,8 @@ import { UserRepository } from 'src/common/repositories/user.repository';
 import { UserEntity } from 'src/core/database/entities/user.entity';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { JwtStrategy } from './strategies/jwt.strategy';
-import { GoogleStrategy } from './strategies/google.strategy';
-import { FacebookStrategy } from './strategies/facebook.strategy';
-import { GithubStrategy } from './strategies/github.strategy';
 import { Auth0Strategy } from './strategies/auth0.strategy';
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   imports: [
@@ -27,15 +24,7 @@ import { Auth0Strategy } from './strategies/auth0.strategy';
     TypeOrmModule.forFeature([UserEntity]),
   ],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    UserRepository,
-    JwtStrategy,
-    GoogleStrategy,
-    FacebookStrategy,
-    GithubStrategy,
-    Auth0Strategy,
-  ],
+  providers: [AuthService, UserRepository, JwtStrategy, Auth0Strategy],
   exports: [JwtModule, JwtStrategy, PassportModule],
 })
 export class AuthModule {}
