@@ -5,7 +5,6 @@ import {
   Get,
   HttpStatus,
   Post,
-  Query,
   Req,
   UseGuards,
   UseInterceptors,
@@ -38,59 +37,45 @@ export class AuthController {
     return new ApiResponse(true, HttpStatus.OK, 'User logged in successfully', response);
   }
 
-  // @Get('google')
-  // @UseGuards(AuthGuard('google'))
-  // @ApiOperation({ summary: 'Login with Google' })
-  // googleAuth() {
-  //   return new ApiResponse(true, HttpStatus.OK, 'Redirects to Google login');
-  // }
-
-  // @Get('google/callback')
-  // @UseGuards(AuthGuard('google'))
-  // @ApiOperation({ summary: 'Google auth callback' })
-  // async googleAuthRedirect(@Req() req: AuthenticatedRequest) {
-  //   return new ApiResponse(true, HttpStatus.OK, 'Google authentication successful', req.user);
-  // }
-
-  // @Get('facebook')
-  // @UseGuards(AuthGuard('facebook'))
-  // @ApiOperation({ summary: 'Login with Facebook' })
-  // facebookAuth() {
-  //   return new ApiResponse(true, HttpStatus.OK, 'Redirects to Facebook login');
-  // }
-
-  // @Get('facebook/callback')
-  // @UseGuards(AuthGuard('facebook'))
-  // @ApiOperation({ summary: 'Facebook auth callback' })
-  // async facebookAuthRedirect(@Req() req: AuthenticatedRequest) {
-  //   return new ApiResponse(true, HttpStatus.OK, 'Facebook authentication successful', req.user);
-  // }
-
-  // @Get('github')
-  // @UseGuards(AuthGuard('github'))
-  // @ApiOperation({ summary: 'Login with GitHub' })
-  // githubAuth() {
-  //   return new ApiResponse(true, HttpStatus.OK, 'Redirects to Github login');
-  // }
-
-  // @Get('github/callback')
-  // @UseGuards(AuthGuard('github'))
-  // @ApiOperation({ summary: 'GitHub auth callback' })
-  // async githubAuthRedirect(@Req() req: AuthenticatedRequest) {
-  //   return new ApiResponse(true, HttpStatus.OK, 'Github authentication successful', req.user);
-  // }
-
-  @Get('auth0')
-  @UseGuards(AuthGuard('auth0'))
-  @ApiOperation({ summary: 'Login with auth0' })
-  githubAuth() {
-    return new ApiResponse(true, HttpStatus.OK, 'Redirects to auth0 login');
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  @ApiOperation({ summary: 'Login with Google' })
+  googleAuth() {
+    return new ApiResponse(true, HttpStatus.OK, 'Redirects to Google login');
   }
 
-  @Get('auth0/callback')
-  @UseGuards(AuthGuard('auth0'))
-  @ApiOperation({ summary: 'Auth0 callback' })
-  async authCallback(@Req() req: AuthenticatedRequest) {
-    return new ApiResponse(true, HttpStatus.OK, 'Auth0 authentication successful', req.user);
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  @ApiOperation({ summary: 'Google auth callback' })
+  async googleAuthRedirect(@Req() req: AuthenticatedRequest) {
+    return new ApiResponse(true, HttpStatus.OK, 'Google authentication successful', req.user);
+  }
+
+  @Get('facebook')
+  @UseGuards(AuthGuard('facebook'))
+  @ApiOperation({ summary: 'Login with Facebook' })
+  facebookAuth() {
+    return new ApiResponse(true, HttpStatus.OK, 'Redirects to Facebook login');
+  }
+
+  @Get('facebook/callback')
+  @UseGuards(AuthGuard('facebook'))
+  @ApiOperation({ summary: 'Facebook auth callback' })
+  async facebookAuthRedirect(@Req() req: AuthenticatedRequest) {
+    return new ApiResponse(true, HttpStatus.OK, 'Facebook authentication successful', req.user);
+  }
+
+  @Get('github')
+  @UseGuards(AuthGuard('github'))
+  @ApiOperation({ summary: 'Login with GitHub' })
+  githubAuth() {
+    return new ApiResponse(true, HttpStatus.OK, 'Redirects to Github login');
+  }
+
+  @Get('github/callback')
+  @UseGuards(AuthGuard('github'))
+  @ApiOperation({ summary: 'GitHub auth callback' })
+  async githubAuthRedirect(@Req() req: AuthenticatedRequest) {
+    return new ApiResponse(true, HttpStatus.OK, 'Github authentication successful', req.user);
   }
 }
