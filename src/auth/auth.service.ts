@@ -1,13 +1,23 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
-import { AuthErrors } from 'src/common/constants/auth.errors';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { AuthError } from 'src/common/constants/basic.errors';
 import { UserRepository } from 'src/common/repositories/user.repository';
 import { UserEntity } from 'src/core/database/entities/user.entity';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
 import { ILoginResponse, IOAuthUser } from './interfaces/auth.interface';
+import { UserOrganizationRepository } from 'src/common/repositories/user-organization.repository';
+import { UserOrganizationEntity } from 'src/core/database/entities/user-organization.entity';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly userOrganizationRepository: UserOrganizationRepository
+  ) {}
 
   /**
    * Handles user registration.
@@ -17,10 +27,12 @@ export class AuthService {
    * @throws ConflictException if the email is already in use.
    */
   async register(data: RegisterDto): Promise<UserEntity> {
-    const { Email, Password } = data;
+    const { Email, Password, Organizations } = data;
 
-    const user = await this.userRepository.findByField('Email', Email);
-    if (user) throw new ConflictException(AuthErrors.EMAIL_IN_USE);
+    if (!Organizations?.length) throw new BadRequestException(AuthError.organizationsRequired);
+
+    const user = await this.userRepository.findOne({ Email });
+    if (user) throw new ConflictException(AuthError.EmailAlreadyInUse);
 
     const hashPassword = await this.userRepository.hashPassword(Password);
 
@@ -28,6 +40,14 @@ export class AuthService {
       ...data,
       Password: hashPassword,
     } as unknown as UserEntity);
+
+    for (const org of Organizations) {
+      await this.userOrganizationRepository.saveEntity({
+        User: savedUser,
+        Organization: { Id: org.OrganizationId },
+        UserOrganizationRole: [{ Role: org.Roles }],
+      } as unknown as UserOrganizationEntity);
+    }
 
     return this.userRepository.findById(savedUser?.Id);
   }
@@ -42,11 +62,11 @@ export class AuthService {
   async login(data: LoginDto): Promise<ILoginResponse> {
     const { Email, Password } = data;
 
-    const user = await this.userRepository.findByField('Email', Email);
-    if (!user) throw new UnauthorizedException(AuthErrors.INVALID_CREDENTIALS);
+    const user = await this.userRepository.findOne({ Email });
+    if (!user) throw new UnauthorizedException(AuthError.UserNotFound);
 
     const matchedPassword = await this.userRepository.comparePassword(Password, user.Password);
-    if (!matchedPassword) throw new UnauthorizedException(AuthErrors.INVALID_CREDENTIALS);
+    if (!matchedPassword) throw new UnauthorizedException(AuthError.InvalidCredentials);
 
     const token = await this.userRepository.generateAccessToken(user);
 
@@ -63,9 +83,9 @@ export class AuthService {
   async validateSocialLogin(socialUser: IOAuthUser): Promise<ILoginResponse> {
     const { emails, id, displayName } = socialUser;
 
-    if (!id || !emails) throw new Error(AuthErrors.INVALID_OAUTH);
+    if (!id || !emails) throw new BadRequestException(AuthError.InvalidOAuth);
 
-    let user = await this.userRepository.findOneByFields({ Email: String(emails) });
+    let user = await this.userRepository.findOne({ Email: String(emails) });
 
     const token = await this.userRepository.generateAccessToken(user);
     user = await this.userRepository.findById(user?.Id);

@@ -1,7 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsNotEmpty, Matches, MinLength } from 'class-validator';
-import { ROLE } from 'src/common/types/roles.enum';
+import { Type } from 'class-transformer';
+import {
+  IsArray,
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  Matches,
+  MinLength,
+  ValidateNested,
+} from 'class-validator';
 
+/** Login DTO */
 export class LoginDto {
   @ApiProperty({
     example: 'user@example.com',
@@ -26,6 +35,29 @@ export class LoginDto {
   Password: string;
 }
 
+/** DTO for mapping organization & roles */
+export class OrganizationRoleDto {
+  @ApiProperty({
+    example: '1',
+    description: 'ID of the organization',
+    required: true,
+  })
+  @IsNotEmpty({ message: 'Organization ID is required' })
+  @IsString()
+  OrganizationId: string;
+
+  @ApiProperty({
+    example: ['1', '2'],
+    description: 'Array of role IDs assigned within this organization',
+    required: true,
+    type: [String],
+  })
+  @IsArray({ message: 'Roles must be an array' })
+  @IsString({ each: true, message: 'Each role ID must be a string' })
+  Roles: string[];
+}
+
+/** Registration DTO */
 export class RegisterDto extends LoginDto {
   @ApiProperty({
     example: 'John Doe',
@@ -33,17 +65,18 @@ export class RegisterDto extends LoginDto {
     required: true,
   })
   @IsNotEmpty({ message: 'Full name is required' })
+  @IsString()
   FullName: string;
 
   @ApiProperty({
-    example: ROLE.USER,
-    description: 'Role of the user (super_admin, organization_admin, user)',
-    enum: ROLE,
+    description: 'Array of organizations with assigned roles',
+    type: [OrganizationRoleDto],
     required: true,
   })
-  @IsEnum(ROLE, { message: 'Invalid role' })
-  @IsNotEmpty({ message: 'Role is required' })
-  Role: ROLE;
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => OrganizationRoleDto)
+  Organizations: OrganizationRoleDto[];
 }
 
 export class ForgetPasswordDto {
@@ -54,5 +87,5 @@ export class ForgetPasswordDto {
   })
   @IsEmail({}, { message: 'Invalid email format' })
   @IsNotEmpty({ message: 'Email is required' })
-  Email: string;
+  email: string;
 }

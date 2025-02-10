@@ -11,6 +11,7 @@ import { FacebookStrategy } from './strategies/facebook.strategy';
 import { GithubStrategy } from './strategies/github.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { UserOrganizationRepository } from 'src/common/repositories/user-organization.repository';
 
 @Module({
   imports: [
@@ -28,11 +29,12 @@ import { JwtStrategy } from './strategies/jwt.strategy';
   controllers: [AuthController],
   providers: [
     AuthService,
-    UserRepository,
     JwtStrategy,
     GoogleStrategy,
     FacebookStrategy,
     GithubStrategy,
+    UserRepository,
+    UserOrganizationRepository,
   ],
   exports: [JwtModule, JwtStrategy, PassportModule],
 })

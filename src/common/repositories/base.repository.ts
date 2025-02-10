@@ -29,7 +29,7 @@ export class BaseRepository<T> {
    * @param conditions - An object containing field-value pairs to search by.
    * @returns The entity if found, otherwise `null`.
    */
-  async findOneByFields(conditions: Partial<T>): Promise<T | null> {
+  async findOne(conditions: Partial<T>): Promise<T | null> {
     const where: FindOptionsWhere<T>[] = Object.entries(conditions).map(
       ([key, value]) => ({ [key]: value }) as FindOptionsWhere<T>
     );

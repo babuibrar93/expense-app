@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-facebook';
-import { EAuthProvider } from 'src/common/types/provider.enum';
 import { AuthService } from '../auth.service';
 import { IOAuthUser } from '../interfaces/auth.interface';
 

@@ -4,6 +4,7 @@ import {
   Catch,
   ExceptionFilter,
   HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { ApiResponse } from '../dto/api-response.dto';
@@ -14,7 +15,27 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
 
-    const statusCode = exception?.getStatus?.() ?? 500;
+    let message = 'Internal Server Error';
+    let statusCode = exception?.getStatus?.() ?? HttpStatus.INTERNAL_SERVER_ERROR;
+    let data: any = null;
+
+    if (exception instanceof HttpException) {
+      const exceptionResponse = exception.getResponse() as any;
+      const exceptionStatusCode = exception.getStatus();
+
+      if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
+        return response
+          .status(exceptionStatusCode)
+          .json(
+            new ApiResponse(
+              false,
+              exceptionStatusCode,
+              exceptionResponse.message,
+              exceptionResponse.data
+            )
+          );
+      }
+    }
 
     // Handle Validation Errors from class-validator
     if (exception instanceof BadRequestException) {
@@ -24,7 +45,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       return response.status(400).json(new ApiResponse(false, 400, errors));
     }
 
-    const message = exception?.message || 'Internal server error';
+    message = exception?.message || 'Internal server error';
 
     response.status(statusCode).json(new ApiResponse(false, statusCode, message));
   }

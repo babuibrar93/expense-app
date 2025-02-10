@@ -5,6 +5,8 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './users/user.module';
 import { typeOrmConfig } from './core/config/typeorm.config';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { OrganizationModule } from './organizations/organization.module';
+import { RoleModule } from './roles/role.module';
 
 @Module({
   imports: [
@@ -19,6 +21,8 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
     }),
     AuthModule,
     UserModule,
+    OrganizationModule,
+    RoleModule,
   ],
 })
 export class AppModule implements NestModule {

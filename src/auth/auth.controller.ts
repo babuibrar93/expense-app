@@ -10,7 +10,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiResponse } from 'src/common/dto/api-response.dto';
 import { AuthenticatedRequest } from 'src/common/types/request.interface';
 import { UserEntity } from 'src/core/database/entities/user.entity';
@@ -46,6 +46,7 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
+  @ApiExcludeEndpoint()
   @ApiOperation({ summary: 'Google auth callback' })
   async googleAuthRedirect(@Req() req: AuthenticatedRequest) {
     return new ApiResponse(true, HttpStatus.OK, 'Google authentication successful', req.user);
@@ -60,6 +61,7 @@ export class AuthController {
 
   @Get('facebook/callback')
   @UseGuards(AuthGuard('facebook'))
+  @ApiExcludeEndpoint()
   @ApiOperation({ summary: 'Facebook auth callback' })
   async facebookAuthRedirect(@Req() req: AuthenticatedRequest) {
     return new ApiResponse(true, HttpStatus.OK, 'Facebook authentication successful', req.user);
@@ -73,6 +75,7 @@ export class AuthController {
   }
 
   @Get('github/callback')
+  @ApiExcludeEndpoint()
   @UseGuards(AuthGuard('github'))
   @ApiOperation({ summary: 'GitHub auth callback' })
   async githubAuthRedirect(@Req() req: AuthenticatedRequest) {

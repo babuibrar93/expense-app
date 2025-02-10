@@ -1,9 +1,10 @@
 import { Exclude } from 'class-transformer';
-import { ROLE } from 'src/common/types/roles.enum';
-import { Column, Entity, Index } from 'typeorm';
+import { Column, Entity, Index, OneToMany } from 'typeorm';
 import { BaseEntity } from './base.entity';
+import { UserOrganizationEntity } from './user-organization.entity';
+import { Role } from 'src/common/types/basic.enum';
 
-@Entity({ name: 'Users' })
+@Entity({ name: 'User' })
 export class UserEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 255, nullable: false })
   FullName: string;
@@ -18,8 +19,11 @@ export class UserEntity extends BaseEntity {
 
   @Column({
     type: 'varchar',
-    enum: ROLE,
-    default: ROLE.USER,
+    enum: Role,
+    default: Role.USER,
   })
-  Role: ROLE;
+  Role: Role;
+
+  @OneToMany(() => UserOrganizationEntity, (uo) => uo.User)
+  UserOrganization: UserOrganizationEntity[];
 }

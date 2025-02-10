@@ -15,16 +15,8 @@ export class UserRepository extends BaseRepository<UserEntity> {
     super(UserEntity, manager);
   }
 
-  // Find user by a specific field
-  async findByField<K extends keyof UserEntity>(
-    key: K,
-    value: UserEntity[K]
-  ): Promise<UserEntity | null> {
-    return this.findOneByFields({ [key]: value });
-  }
-
   async findById(id: string): Promise<UserEntity> {
-    const response = this.findOneByFields({ Id: id });
+    const response = this.findOne({ Id: id });
     return plainToInstance(UserEntity, response);
   }
 
@@ -38,14 +30,8 @@ export class UserRepository extends BaseRepository<UserEntity> {
     return bcrypt.compare(password, hashPassword);
   }
 
+  // Generate access token
   async generateAccessToken(user: UserEntity): Promise<string> {
-    return this.jwtService.signAsync({
-      userId: user?.Id,
-      role: user?.Role,
-    });
-  }
-
-  async generateRefreshToken(user: UserEntity): Promise<string> {
     return this.jwtService.signAsync({
       userId: user?.Id,
       role: user?.Role,
