@@ -15,5 +15,6 @@ export class UserOrganizationEntity extends BaseEntity {
   Organization: OrganizationEntity;
 
   @OneToMany(() => UserOrganizationRoleEntity, (uor) => uor.UserOrganization)
+  @JoinColumn({ name: 'RoleId' })
   UserOrganizationRole: UserOrganizationRoleEntity[];
 }

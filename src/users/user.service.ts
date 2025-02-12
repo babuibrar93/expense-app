@@ -6,6 +6,6 @@ export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
 
   async findAllUsers() {
-    return this.userRepository.findAll();
+    return this.userRepository.getORMMethods().find();
   }
 }

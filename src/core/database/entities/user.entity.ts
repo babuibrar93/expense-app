@@ -17,13 +17,6 @@ export class UserEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 255, nullable: true })
   Password: string;
 
-  @Column({
-    type: 'varchar',
-    enum: Role,
-    default: Role.USER,
-  })
-  Role: Role;
-
   @OneToMany(() => UserOrganizationEntity, (uo) => uo.User)
   UserOrganization: UserOrganizationEntity[];
 }

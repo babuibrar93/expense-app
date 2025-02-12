@@ -1,6 +1,6 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { ModuleEntity } from './module.entity';
+import { Column, Entity, ManyToOne } from 'typeorm';
 import { BaseEntity } from './base.entity';
+import { ModuleEntity } from './module.entity';
 
 @Entity({ name: 'Function' })
 export class FunctionEntity extends BaseEntity {

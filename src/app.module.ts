@@ -2,11 +2,12 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
-import { UserModule } from './users/user.module';
-import { typeOrmConfig } from './core/config/typeorm.config';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { typeOrmConfig } from './core/config/typeorm.config';
 import { OrganizationModule } from './organizations/organization.module';
 import { RoleModule } from './roles/role.module';
+import { UserModule } from './users/user.module';
+import { JwtStrategy } from './auth/strategies/jwt.strategy';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { RoleModule } from './roles/role.module';
     OrganizationModule,
     RoleModule,
   ],
+  providers: [JwtStrategy]
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

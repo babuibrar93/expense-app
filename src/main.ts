@@ -12,9 +12,8 @@ async function bootstrap() {
   // Enable CORS
   app.enableCors({
     origin: '*', // Allow all origins in development
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
-    allowedHeaders: 'Content-Type, Accept, Authorization'
+    allowedHeaders: 'Content-Type, Accept, Authorization',
   });
 
   // Apply the Exception Filter
@@ -46,6 +45,15 @@ async function bootstrap() {
 
   await app.listen(PORT, () => {
     console.log(`Server is & running on port ${PORT}`);
+  });
+
+  // Enable better debugging with full stack traces
+  process.on('uncaughtException', (err) => {
+    console.error('Uncaught Exception:', err.stack);
+  });
+
+  process.on('unhandledRejection', (reason) => {
+    console.error('Unhandled Rejection:', reason);
   });
 }
 bootstrap();

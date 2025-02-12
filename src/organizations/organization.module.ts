@@ -1,12 +1,22 @@
 import { Module } from '@nestjs/common';
-import { OrganizationService } from './organization.service';
-import { OrganizationController } from './organization.controller';
+import { DefaultRoleRepository } from 'src/common/repositories/default-role.repository';
 import { OrganizationRepository } from 'src/common/repositories/organization.repository';
+import { RoleRepository } from 'src/common/repositories/role.repository';
+import { UserOrganizationRoleRepository } from 'src/common/repositories/user-organization-role.repository';
+import { UserOrganizationRepository } from 'src/common/repositories/user-organization.repository';
+import { OrganizationController } from './organization.controller';
+import { OrganizationService } from './organization.service';
 
 @Module({
-  imports: [],
   controllers: [OrganizationController],
-  providers: [OrganizationService, OrganizationRepository],
+  providers: [
+    RoleRepository,
+    OrganizationService,
+    OrganizationRepository,
+    UserOrganizationRepository,
+    DefaultRoleRepository,
+    UserOrganizationRoleRepository,
+  ],
   exports: [],
 })
 export class OrganizationModule {}

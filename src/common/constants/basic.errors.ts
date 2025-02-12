@@ -10,6 +10,7 @@ export const AuthError = {
 } as const;
 
 export const GeneralError = {
+  recordNotFound: 'Record not found',
   ForbiddenRole: 'You do not have the required role to access this resource.',
   forbiddenPermission: 'You do not have the required permissions.',
 } as const;

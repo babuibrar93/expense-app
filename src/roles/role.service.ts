@@ -1,28 +1,28 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { RoleError } from 'src/common/constants/basic.errors';
 import { RoleRepository } from 'src/common/repositories/role.repository';
-import { CreateRoleDto, updateRoleDto } from './dto/role.dto';
 import { RoleEntity } from 'src/core/database/entities/role.entity';
+import { CreateRoleDto, updateRoleDto } from './dto/role.dto';
 
 @Injectable()
 export class RoleService {
   constructor(private readonly roleRepository: RoleRepository) {}
 
-  async create(createRoleDto: CreateRoleDto) {
+  async create(createRoleDto: CreateRoleDto): Promise<RoleEntity> {
     const { Name } = createRoleDto;
 
-    const alreadExists = await this.roleRepository.findOne({ Name });
-    if (alreadExists) throw new BadRequestException(RoleError.alreadyExists);
+    const alreadyExists = await this.roleRepository.findOneRecord({ Name });
+    if (alreadyExists) throw new BadRequestException(RoleError.alreadyExists);
 
-    return await this.roleRepository.saveEntity({ Name } as unknown as RoleEntity);
+    return this.roleRepository.getORMMethods().save({ Name });
   }
 
   async getAll(): Promise<RoleEntity[]> {
-    return await this.roleRepository.findAll();
+    return this.roleRepository.getORMMethods().find();
   }
 
-  async getRoleById(id: string): Promise<RoleEntity> {
-    const role = await this.roleRepository.findOne({ Id: id });
+  async getRoleById(Id: string): Promise<RoleEntity> {
+    const role = await this.roleRepository.findOneRecord({ Id });
     if (!role) throw new NotFoundException(RoleError.notFound);
     return role;
   }
@@ -30,11 +30,11 @@ export class RoleService {
   async update(id: string, dto: updateRoleDto): Promise<RoleEntity> {
     const role = await this.getRoleById(id);
     Object.assign(role, dto);
-    return await this.roleRepository.saveEntity(role);
+    return this.roleRepository.getORMMethods().save(role);
   }
 
   async deleteRole(id: string): Promise<void> {
     const role = await this.getRoleById(id);
-    await this.roleRepository.removeEntity(role);
+    await this.roleRepository.getORMMethods().delete(role.Id);
   }
 }

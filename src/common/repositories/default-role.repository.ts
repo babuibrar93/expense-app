@@ -1,17 +1,17 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
-import { UserOrganizationEntity } from 'src/core/database/entities/user-organization.entity';
+import { DefaultRoleEntity } from 'src/core/database/entities/default-role.entity';
 import { DataSource } from 'typeorm';
 import { BaseRepository } from './base.repository';
 
 @Injectable()
-export class UserOrganizationRepository extends BaseRepository<UserOrganizationEntity> {
+export class DefaultRoleRepository extends BaseRepository<DefaultRoleEntity> {
   constructor(dataSource: DataSource, @Inject(REQUEST) req: Request) {
     super(dataSource, req);
   }
 
   getORMMethods() {
-    return this.getRepository(UserOrganizationEntity);
+    return this.getRepository(DefaultRoleEntity);
   }
 }

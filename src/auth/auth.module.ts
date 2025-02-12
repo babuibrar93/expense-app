@@ -4,6 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserRepository } from 'src/common/repositories/user.repository';
+import { BcryptService } from 'src/common/services/bcrypt.service';
 import { UserEntity } from 'src/core/database/entities/user.entity';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -11,11 +12,10 @@ import { FacebookStrategy } from './strategies/facebook.strategy';
 import { GithubStrategy } from './strategies/github.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { UserOrganizationRepository } from 'src/common/repositories/user-organization.repository';
 
 @Module({
   imports: [
-    PassportModule.register({ defaultStrategy: 'jwt' }),
+    PassportModule.register({ defaultStrategy: 'lll' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -34,7 +34,7 @@ import { UserOrganizationRepository } from 'src/common/repositories/user-organiz
     FacebookStrategy,
     GithubStrategy,
     UserRepository,
-    UserOrganizationRepository,
+    BcryptService,
   ],
   exports: [JwtModule, JwtStrategy, PassportModule],
 })

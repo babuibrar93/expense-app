@@ -4,6 +4,7 @@ import {
   IsArray,
   IsEmail,
   IsNotEmpty,
+  IsOptional,
   IsString,
   Matches,
   MinLength,
@@ -68,15 +69,16 @@ export class RegisterDto extends LoginDto {
   @IsString()
   FullName: string;
 
-  @ApiProperty({
-    description: 'Array of organizations with assigned roles',
-    type: [OrganizationRoleDto],
-    required: true,
-  })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => OrganizationRoleDto)
-  Organizations: OrganizationRoleDto[];
+  // @ApiProperty({
+  //   description: 'Array of organizations with assigned roles',
+  //   type: [OrganizationRoleDto],
+  //   required: true,
+  // })
+  // @IsOptional()
+  // @IsArray()
+  // @ValidateNested({ each: true })
+  // @Type(() => OrganizationRoleDto)
+  // Organizations: OrganizationRoleDto[];
 }
 
 export class ForgetPasswordDto {
