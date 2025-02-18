@@ -24,7 +24,7 @@ export class AuthService {
     const { Email, Password } = data;
 
     // Check if user exists
-    const existingUser = await this.userRepository.findOneRecord({ Email });
+    const existingUser = await this.userRepository.getORMMethods().findOne({ where: { Email } });
     if (existingUser) throw new ConflictException(AuthError.EmailAlreadyInUse);
 
     // Hash password and save user
