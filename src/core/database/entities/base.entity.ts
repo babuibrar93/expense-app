@@ -17,12 +17,12 @@
     @Index()
     @ManyToOne(() => UserEntity, { nullable: true })
     @JoinColumn({ name: 'CreatedBy' }) 
-    CreatedBy: UserEntity | null;
+    CreatedBy: UserEntity | string;
 
     @Index()
     @ManyToOne(() => UserEntity, { nullable: true })
     @JoinColumn({ name: 'DeletedBy' }) 
-    DeletedBy: UserEntity | null;
+    DeletedBy: UserEntity | string;
 
     @Index()
     @CreateDateColumn({ name: 'CreatedAt', type: 'datetime2' }) 

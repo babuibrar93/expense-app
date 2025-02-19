@@ -1,5 +1,5 @@
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
+import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import * as path from 'path';
 
 export const typeOrmConfig = (configService: ConfigService): TypeOrmModuleOptions => ({
@@ -14,5 +14,5 @@ export const typeOrmConfig = (configService: ConfigService): TypeOrmModuleOption
     trustServerCertificate: true,
   },
   entities: [path.join(__dirname, '/../**/*.entity.{ts,js}')],
-  migrations: [path.join(__dirname, '/migrations/*.ts')],
+  migrations: [path.join(__dirname, '/../**/*.migration.{ts,js}')],
 });

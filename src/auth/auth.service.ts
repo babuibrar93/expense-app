@@ -1,5 +1,7 @@
 import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Request } from 'express';
 import { AuthErrors } from 'src/common/constants/auth.errors';
+import { AUTH_TOKEN } from 'src/common/constants/basic.constant';
 import { UserRepository } from 'src/common/repositories/user.repository';
 import { UserEntity } from 'src/core/database/entities/user.entity';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
@@ -78,5 +80,11 @@ export class AuthService {
     } else return { user, token };
 
     return { user, token };
+  }
+
+  async getTokenFromCookie(req: Request) {
+    const token = req.cookies[AUTH_TOKEN]; // Read token from cookie
+    if (!token) throw new UnauthorizedException('No token found');
+    return { token };
   }
 }

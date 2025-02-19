@@ -6,11 +6,15 @@ import {
   HttpStatus,
   Post,
   Req,
+  Res,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Request, Response } from 'express';
+import { AUTH_TOKEN } from 'src/common/constants/basic.constant';
 import { ApiResponse } from 'src/common/dto/api-response.dto';
 import { AuthenticatedRequest } from 'src/common/types/request.interface';
 import { UserEntity } from 'src/core/database/entities/user.entity';
@@ -21,7 +25,10 @@ import { LoginDto, RegisterDto } from './dto/auth.dto';
 @ApiTags('Auth')
 @UseInterceptors(ClassSerializerInterceptor)
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly authService: AuthService
+  ) {}
 
   @Post('register')
   @ApiOperation({ summary: 'Register your account' })
@@ -46,9 +53,18 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  @ApiOperation({ summary: 'Google auth callback' })
-  async googleAuthRedirect(@Req() req: AuthenticatedRequest) {
-    return new ApiResponse(true, HttpStatus.OK, 'Google authentication successful', req.user);
+  async googleAuthRedirect(@Req() req: AuthenticatedRequest, @Res() res: Response) {
+    const token = (req.user as any).token;
+
+    // Store JWT in HTTP-Only Cookie
+    res.cookie(AUTH_TOKEN, token, {
+      httpOnly: true, // Secure cookie (not accessible by JavaScript)
+      secure: false, // Set to `true` in production with HTTPS
+      path: '/', // Cookie accessible from all routes
+    });
+
+    // Redirect to frontend home page
+    res.redirect(this.configService.get<string>('FRONTEND_URL'));
   }
 
   @Get('facebook')
@@ -61,8 +77,18 @@ export class AuthController {
   @Get('facebook/callback')
   @UseGuards(AuthGuard('facebook'))
   @ApiOperation({ summary: 'Facebook auth callback' })
-  async facebookAuthRedirect(@Req() req: AuthenticatedRequest) {
-    return new ApiResponse(true, HttpStatus.OK, 'Facebook authentication successful', req.user);
+  async facebookAuthRedirect(@Req() req: AuthenticatedRequest, @Res() res: Response) {
+    const token = (req.user as any).token;
+
+    // Store JWT in HTTP-Only Cookie
+    res.cookie(AUTH_TOKEN, token, {
+      httpOnly: true, // Secure cookie (not accessible by JavaScript)
+      secure: false, // Set to `true` in production with HTTPS
+      path: '/', // Cookie accessible from all routes
+    });
+
+    // Redirect to frontend home page
+    res.redirect(this.configService.get<string>('FRONTEND_URL'));
   }
 
   @Get('github')
@@ -75,7 +101,22 @@ export class AuthController {
   @Get('github/callback')
   @UseGuards(AuthGuard('github'))
   @ApiOperation({ summary: 'GitHub auth callback' })
-  async githubAuthRedirect(@Req() req: AuthenticatedRequest) {
-    return new ApiResponse(true, HttpStatus.OK, 'Github authentication successful', req.user);
+  async githubAuthRedirect(@Req() req: AuthenticatedRequest, @Res() res: Response) {
+    const token = (req.user as any).token;
+
+    // Store JWT in HTTP-Only Cookie
+    res.cookie(AUTH_TOKEN, token, {
+      httpOnly: true, // Secure cookie (not accessible by JavaScript)
+      secure: false, // Set to `true` in production with HTTPS
+      path: '/', // Cookie accessible from all routes
+    });
+
+    // Redirect to frontend home page
+    res.redirect(this.configService.get<string>('FRONTEND_URL'));
+  }
+
+  @Get('token')
+  getToken(@Req() req: Request) {
+    return this.authService.getTokenFromCookie(req);
   }
 }

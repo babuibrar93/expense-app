@@ -4,6 +4,7 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/exception.filter';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -11,11 +12,12 @@ async function bootstrap() {
 
   // Enable CORS
   app.enableCors({
-    origin: '*', // Allow all origins in development
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    origin: ['http://localhost:4200'], // Allow all origins in development
     credentials: true,
-    allowedHeaders: 'Content-Type, Accept, Authorization'
+    allowedHeaders: 'Content-Type, Accept, Authorization',
   });
+
+  app.use(cookieParser());
 
   // Apply the Exception Filter
   app.useGlobalFilters(new GlobalExceptionFilter());

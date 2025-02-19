@@ -41,14 +41,12 @@ export class UserRepository extends BaseRepository<UserEntity> {
   async generateAccessToken(user: UserEntity): Promise<string> {
     return this.jwtService.signAsync({
       userId: user?.Id,
-      role: user?.Role,
     });
   }
 
   async generateRefreshToken(user: UserEntity): Promise<string> {
     return this.jwtService.signAsync({
       userId: user?.Id,
-      role: user?.Role,
     });
   }
 }
