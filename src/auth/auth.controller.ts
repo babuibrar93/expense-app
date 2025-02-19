@@ -16,6 +16,7 @@ import { AuthenticatedRequest } from 'src/common/types/request.interface';
 import { UserEntity } from 'src/core/database/entities/user.entity';
 import { AuthService } from './auth.service';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
+import { GoogleOauthGuard } from 'src/common/guards/google-auth.guard';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -38,14 +39,14 @@ export class AuthController {
   }
 
   @Get('google')
-  @UseGuards(AuthGuard('google'))
+  @UseGuards(GoogleOauthGuard)
   @ApiOperation({ summary: 'Login with Google' })
   googleAuth() {
     return new ApiResponse(true, HttpStatus.OK, 'Redirects to Google login');
   }
 
   @Get('google/callback')
-  @UseGuards(AuthGuard('google'))
+  @UseGuards(GoogleOauthGuard)
   @ApiExcludeEndpoint()
   @ApiOperation({ summary: 'Google auth callback' })
   async googleAuthRedirect(@Req() req: AuthenticatedRequest) {
@@ -80,5 +81,19 @@ export class AuthController {
   @ApiOperation({ summary: 'GitHub auth callback' })
   async githubAuthRedirect(@Req() req: AuthenticatedRequest) {
     return new ApiResponse(true, HttpStatus.OK, 'Github authentication successful', req.user);
+  }
+
+  @Get('auth0')
+  @UseGuards(AuthGuard('auth0'))
+  @ApiOperation({ summary: 'Login with auth0' })
+  singleSignOn() {
+    return new ApiResponse(true, HttpStatus.OK, 'Redirects to auth0 login');
+  }
+
+  @Get('auth0/callback')
+  @UseGuards(AuthGuard('auth0'))
+  @ApiOperation({ summary: 'Auth0 callback' })
+  async authCallback(@Req() req: AuthenticatedRequest) {
+    return new ApiResponse(true, HttpStatus.OK, 'Auth0 authentication successful', req.user);
   }
 }

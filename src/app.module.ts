@@ -25,10 +25,10 @@ import { JwtStrategy } from './auth/strategies/jwt.strategy';
     OrganizationModule,
     RoleModule,
   ],
-  providers: [JwtStrategy]
+  providers: [JwtStrategy],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware).forRoutes('*');
-  }
+export class AppModule {
+  // configure(consumer: MiddlewareConsumer) {
+  //   consumer.apply(LoggerMiddleware).forRoutes('*');
+  // }
 }

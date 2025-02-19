@@ -4,6 +4,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { AuthService } from '../auth.service';
 import { IOAuthUser } from '../interfaces/auth.interface';
+import * as passport from 'passport';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
@@ -20,13 +21,18 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     });
   }
 
+
+  onModuleInit() {
+    console.log('✅ Available Passport Strategies:', passport ? Object.keys(passport) : 'No strategies found');
+  }
+
   async validate(
     accessToken: string,
     refreshToken: string,
-    provider: IOAuthUser,
+    profile: IOAuthUser,
     done: VerifyCallback
   ): Promise<any> {
-    const { id, displayName, emails } = provider;
+    const { id, displayName, emails } = profile;
     const user: IOAuthUser = {
       id,
       emails: emails[0].value,
