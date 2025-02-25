@@ -1,21 +1,28 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { OrganizationError } from 'src/common/constants/basic.errors';
+import { AuthError, OrganizationError } from 'src/common/constants/basic.errors';
 import { DefaultRoleRepository } from 'src/common/repositories/default-role.repository';
 import { OrganizationRepository } from 'src/common/repositories/organization.repository';
 import { RoleRepository } from 'src/common/repositories/role.repository';
 import { UserOrganizationRoleRepository } from 'src/common/repositories/user-organization-role.repository';
 import { UserOrganizationRepository } from 'src/common/repositories/user-organization.repository';
+import { UserRepository } from 'src/common/repositories/user.repository';
 import { Role } from 'src/common/types/basic.enum';
 import { OrganizationEntity } from 'src/core/database/entities/organization.entity';
+import { UserOrganizationEntity } from 'src/core/database/entities/user-organization.entity';
 import { UserEntity } from 'src/core/database/entities/user.entity';
-import { CreateOrganizationDto, UpdateOrganizationDto } from './dto/organization.dto';
+import {
+  CreateOrganizationDto,
+  GetOrganizationDto,
+  UpdateOrganizationDto,
+} from './dto/organization.dto';
 
 @Injectable()
 export class OrganizationService {
   constructor(
-    private readonly organizationRepository: OrganizationRepository,
     private readonly roleRepository: RoleRepository,
+    private readonly userRepository: UserRepository,
     private readonly defaultRoleRepository: DefaultRoleRepository,
+    private readonly organizationRepository: OrganizationRepository,
     private readonly userOrganizationRepository: UserOrganizationRepository,
     private readonly userOrganizationRoleRepository: UserOrganizationRoleRepository
   ) {}
@@ -24,14 +31,12 @@ export class OrganizationService {
     createOrganizationDto: CreateOrganizationDto,
     currentUser: UserEntity
   ): Promise<OrganizationEntity> {
-    const { Name, Description } = createOrganizationDto;
+    const { Name } = createOrganizationDto;
 
     // Check if organization already exists
-    const alreadyExists = await this.organizationRepository
-      .getORMMethods()
-      .findOne({
-        where: { Name, CreatedBy: { Id: currentUser?.Id } },
-      });
+    const alreadyExists = await this.organizationRepository.getORMMethods().findOne({
+      where: { Name, CreatedBy: { Id: currentUser?.Id } },
+    });
 
     if (alreadyExists) throw new BadRequestException(OrganizationError.alreadyExists);
 
@@ -43,7 +48,7 @@ export class OrganizationService {
     if (!defaultRole) {
       defaultRole = await this.defaultRoleRepository.getORMMethods().save({
         Role: Role.SUPER_ADMIN,
-        CreatedBy: currentUser,
+        CreatedBy: { Id: currentUser?.Id },
       });
     }
 
@@ -57,54 +62,140 @@ export class OrganizationService {
     if (!savedRole) {
       savedRole = await this.roleRepository.getORMMethods().save({
         Name: defaultRole.Role,
-        CreatedBy: currentUser,
+        CreatedBy: { Id: currentUser?.Id },
       });
     }
 
     // Create organization
-    const savedOrganization = await this.organizationRepository.getORMMethods().save({
-      Name,
-      Description,
-      CreatedBy: currentUser,
+    return await this.organizationRepository.getORMMethods().save({
+      ...createOrganizationDto,
+      CreatedBy: currentUser as UserEntity,
     });
-
-    // Create User-Organization relation
-    const savedUserOrganization = await this.userOrganizationRepository.getORMMethods().save({
-      User: currentUser,
-      Organization: savedOrganization,
-      CreatedBy: currentUser,
-    });
-
-    // Assign role to the user within the organization
-    await this.userOrganizationRoleRepository.getORMMethods().save({
-      UserOrganization: savedUserOrganization,
-      Role: savedRole,
-      CreatedBy: currentUser,
-    });
-
-    return savedOrganization;
   }
 
-  async findAll(): Promise<OrganizationEntity[]> {
-    return await this.organizationRepository.getORMMethods().find();
+  async findAll(
+    query: GetOrganizationDto
+  ): Promise<{ organizations: OrganizationEntity[]; total: number }> {
+    const { page = 1, limit = 10, search, sortBy = 'CreatedAt', order = 'DESC' } = query;
+
+    const qb = this.organizationRepository.getORMMethods().createQueryBuilder('organization');
+
+    if (search) {
+      qb.where('organization.Name LIKE :search', { search: `%${search}%` });
+    }
+
+    const [organizations, total] = await qb
+      .orderBy(`organization.${sortBy}`, order as 'ASC' | 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
+
+    return { organizations, total };
   }
 
   async findOne(id: string): Promise<OrganizationEntity> {
     return await this.organizationRepository.getORMMethods().findOne({ where: { Id: id } });
   }
 
-  async update(id: string, updateOrganizationDto: UpdateOrganizationDto): Promise<OrganizationEntity> {
+  async update(
+    id: string,
+    currentUser: UserEntity,
+    updateOrganizationDto: UpdateOrganizationDto
+  ): Promise<OrganizationEntity> {
+    const { UserId, RoleId } = updateOrganizationDto;
     const organization = await this.findOne(id);
-    if (!organization) throw new BadRequestException('Organization not found');
+    if (!organization) throw new BadRequestException(OrganizationError.notFound);
 
     Object.assign(organization, updateOrganizationDto);
-    return await this.organizationRepository.getORMMethods().save(organization);
+
+    if (UserId) {
+      const { users } = await this.getUsersByOrganization(id);
+      const user = await this.userRepository.findOneRecord({ Id: UserId });
+      if (!user) throw new BadRequestException(AuthError.UserNotFound);
+
+      let role = RoleId
+        ? await this.roleRepository.findOneRecord({ Id: RoleId })
+        : users?.length
+          ? await this.roleRepository.findOneRecord({ Name: Role.USER })
+          : await this.defaultRoleRepository.findOneRecord({ Role: Role.SUPER_ADMIN });
+
+      if (!role) {
+        role = await this.roleRepository.getORMMethods().save({
+          Name: Role.USER,
+          CreatedByBy: currentUser,
+        });
+      }
+
+      let userOrganization = await this.userOrganizationRepository.getORMMethods().findOne({
+        where: { User: { Id: UserId }, Organization: { Id: id } },
+      });
+
+      if (!userOrganization) {
+        userOrganization = await this.userOrganizationRepository.getORMMethods().save({
+          User: { Id: UserId },
+          Organization: organization,
+          CreatedByBy: currentUser,
+        });
+      }
+
+      const userOrganizationRoleExists = await this.userOrganizationRoleRepository
+        .getORMMethods()
+        .findOne({
+          where: { UserOrganization: { Id: userOrganization.Id }, Role: { Id: role.Id } },
+        });
+
+      if (!userOrganizationRoleExists) {
+        await this.userOrganizationRoleRepository.getORMMethods().save({
+          UserOrganization: userOrganization,
+          Role: role,
+          CreatedBy: currentUser,
+        });
+      }
+    }
+
+    return this.organizationRepository.getORMMethods().save(organization);
   }
 
   async remove(id: string): Promise<void> {
     const organization = await this.findOne(id);
-    if (!organization) throw new BadRequestException('Organization not found');
+    if (!organization) throw new BadRequestException(OrganizationError.notFound);
 
     await this.organizationRepository.getORMMethods().remove(organization);
+  }
+
+  async getUsersByOrganization(
+    organizationId: string,
+    query?: GetOrganizationDto
+  ): Promise<{ users: UserOrganizationEntity[]; total: number }> {
+    const { page, limit, search, sortBy = 'CreatedAt', order = 'DESC' } = query;
+
+    const queryBuilder = this.userOrganizationRepository
+      .getORMMethods()
+      .createQueryBuilder('userOrganization')
+      .leftJoinAndSelect('userOrganization.User', 'user')
+      .leftJoinAndSelect('userOrganization.Organization', 'organization')
+      .leftJoinAndSelect('userOrganization.UserOrganizationRole', 'userOrganizationRole')
+      .leftJoinAndSelect('userOrganizationRole.Role', 'role')
+      .where('userOrganization.OrganizationId = :organizationId', { organizationId });
+
+    // Apply search filter (case-insensitive search on name & email)
+    if (search) {
+      queryBuilder.andWhere(
+        `(LOWER(user.Name) LIKE LOWER(:search) OR LOWER(user.Email) LIKE LOWER(:search)) OR LOWER(user.FullName) LIKE LOWER(:search))`,
+        { search: `%${search}%` }
+      );
+    }
+
+    queryBuilder.orderBy(`user.${sortBy}`, order as 'ASC' | 'DESC');
+
+    // Pagination logic
+    const offset = (page - 1) * limit;
+
+    const [users, total] = await queryBuilder
+      .skip(offset) // Apply pagination
+      .take(limit) // Fetch limited results
+      .getManyAndCount();
+
+    return { users, total };
   }
 }

@@ -7,11 +7,11 @@ import { BaseRepository } from './base.repository';
 
 @Injectable()
 export class OrganizationRepository extends BaseRepository<OrganizationEntity> {
-  constructor(@Inject(REQUEST) req: Request, dataSource: DataSource) {
-    super(dataSource, req);
+  constructor(dataSource: DataSource) {
+    super(dataSource, OrganizationEntity);
   }
 
   getORMMethods() {
-    return this.getRepository(OrganizationEntity);
+    return this.getRepository();
   }
 }

@@ -16,7 +16,7 @@ export class ModuleEntity extends BaseEntity {
 
   @ManyToOne(() => ModuleEntity, (module) => module.SubModules, { nullable: true })
   @JoinColumn({ name: 'ParentId' })
-  ParentModule: ModuleEntity;
+  ParentModule: ModuleEntity | null;
 
   @OneToMany(() => ModuleEntity, (module) => module.ParentModule)
   SubModules: ModuleEntity[];

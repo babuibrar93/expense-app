@@ -1,1 +1,1 @@
-export const ENTITY_MANAGER_KEY = 'ENTITY_MANAGER';
+export const AUTH_TOKEN = 'authToken';

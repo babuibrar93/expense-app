@@ -1,28 +1,18 @@
-import { Request } from 'express';
-import { DataSource, EntityManager, Repository } from 'typeorm';
-import { ENTITY_MANAGER_KEY } from '../constants/basic.constant';
+import { DataSource, EntityTarget, QueryRunner, Repository } from 'typeorm';
 
-/**
- * A generic repository class that provides reusable database operations
- * for any entity in a TypeORM-based application.
- *
- * @template T - The entity type that this repository will manage.
- */
 export class BaseRepository<T> {
-  /**
-   * Constructor initializes the repository with the specified entity and manager.
-   *
-   * @param entity - The target entity that this repository will manage.
-   * @param manager - The TypeORM entity manager for handling database operations.
-   */
+  private repository: Repository<T>;
+
   constructor(
     private dataSource: DataSource,
-    private request: Request
-  ) {}
+    entity: EntityTarget<T>
+  ) {
+    this.repository = this.dataSource.getRepository(entity);
+  }
 
-  protected getRepository<T>(entityCls: new () => T): Repository<T> {
-    const entityManager: EntityManager =
-      this.request[ENTITY_MANAGER_KEY] ?? this.dataSource.manager;
-    return entityManager.getRepository(entityCls);
+  protected getRepository(queryRunner?: QueryRunner): Repository<T> {
+    return queryRunner
+      ? queryRunner.manager.getRepository(this.repository.target)
+      : this.repository;
   }
 }

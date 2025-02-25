@@ -7,7 +7,13 @@ export class OrganizationEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 255, nullable: false })
   Name: string;
 
-  @Column({ type: 'varchar', length: 500, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: false })
+  Email: string;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  Phone: string;
+
+  @Column({ type: 'text', nullable: true })
   Description: string;
 
   @OneToMany(() => UserOrganizationEntity, (uo) => uo.Organization)

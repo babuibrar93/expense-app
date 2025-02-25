@@ -5,17 +5,20 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import axios from 'axios';
+import { Request } from 'express';
+import { AUTH_TOKEN } from 'src/common/constants/basic.constant';
 import { AuthError } from 'src/common/constants/basic.errors';
 import { UserRepository } from 'src/common/repositories/user.repository';
 import { BcryptService } from 'src/common/services/bcrypt.service';
 import { UserEntity } from 'src/core/database/entities/user.entity';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
 import { ILoginResponse, IOAuthUser } from './interfaces/auth.interface';
-import axios from 'axios';
 
 @Injectable()
 export class AuthService {
-  private auth0Domain
+  private auth0Domain: string;
+
   constructor(
     private readonly jwtService: JwtService,
     private readonly userRepository: UserRepository,
@@ -26,7 +29,7 @@ export class AuthService {
     const { Email, Password } = data;
 
     // Check if user exists
-    const existingUser = await this.userRepository.getORMMethods().findOne({ where: { Email } });
+    const existingUser = await this.userRepository.findOneRecord({ Email });
     if (existingUser) throw new ConflictException(AuthError.EmailAlreadyInUse);
 
     // Hash password and save user
@@ -73,11 +76,6 @@ export class AuthService {
     return { user, token };
   }
 
-  generateAccessToken(user: UserEntity): string {
-    const payload = { id: user.Id, email: user.Email, role: user.FullName };
-    return this.jwtService.sign(payload, { expiresIn: '1h' });
-  }
-
   /**
    * Validates and handles social login, checks if user exists, and saves the new user if necessary.
    *
@@ -92,7 +90,7 @@ export class AuthService {
 
     const { email, name } = auth0Response.data;
 
-    let user = await this.userRepository.findOneRecord({ Email: email });
+    let user = await this.userRepository.findOneRecord({ Email: String(email) });
 
     if (!user) {
       user = await this.userRepository.getORMMethods().save({
@@ -104,5 +102,15 @@ export class AuthService {
     const token = await this.generateAccessToken(user);
 
     return { user, token };
+  }
+
+  generateAccessToken(user: UserEntity): string {
+    const payload = { Id: user.Id, Email: user.Email };
+    return this.jwtService.sign(payload, { expiresIn: '24h' });
+  }
+
+  async getTokenFromCookie(req: Request) {
+    const token = req.cookies[AUTH_TOKEN]; // Read token from cookie
+    return { token };
   }
 }

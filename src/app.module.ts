@@ -2,12 +2,12 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
+import { JwtStrategy } from './auth/strategies/jwt.strategy';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { typeOrmConfig } from './core/config/typeorm.config';
 import { OrganizationModule } from './organizations/organization.module';
 import { RoleModule } from './roles/role.module';
 import { UserModule } from './users/user.module';
-import { JwtStrategy } from './auth/strategies/jwt.strategy';
 
 @Module({
   imports: [
@@ -27,8 +27,8 @@ import { JwtStrategy } from './auth/strategies/jwt.strategy';
   ],
   providers: [JwtStrategy],
 })
-export class AppModule {
-  // configure(consumer: MiddlewareConsumer) {
-  //   consumer.apply(LoggerMiddleware).forRoutes('*');
-  // }
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
 }

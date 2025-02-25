@@ -1,14 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
 import {
-  IsArray,
   IsEmail,
   IsNotEmpty,
-  IsOptional,
   IsString,
   Matches,
-  MinLength,
-  ValidateNested,
+  MinLength
 } from 'class-validator';
 
 /** Login DTO */
@@ -36,29 +32,6 @@ export class LoginDto {
   Password: string;
 }
 
-/** DTO for mapping organization & roles */
-export class OrganizationRoleDto {
-  @ApiProperty({
-    example: '1',
-    description: 'ID of the organization',
-    required: true,
-  })
-  @IsNotEmpty({ message: 'Organization ID is required' })
-  @IsString()
-  OrganizationId: string;
-
-  @ApiProperty({
-    example: ['1', '2'],
-    description: 'Array of role IDs assigned within this organization',
-    required: true,
-    type: [String],
-  })
-  @IsArray({ message: 'Roles must be an array' })
-  @IsString({ each: true, message: 'Each role ID must be a string' })
-  Roles: string[];
-}
-
-/** Registration DTO */
 export class RegisterDto extends LoginDto {
   @ApiProperty({
     example: 'John Doe',
@@ -68,17 +41,6 @@ export class RegisterDto extends LoginDto {
   @IsNotEmpty({ message: 'Full name is required' })
   @IsString()
   FullName: string;
-
-  // @ApiProperty({
-  //   description: 'Array of organizations with assigned roles',
-  //   type: [OrganizationRoleDto],
-  //   required: true,
-  // })
-  // @IsOptional()
-  // @IsArray()
-  // @ValidateNested({ each: true })
-  // @Type(() => OrganizationRoleDto)
-  // Organizations: OrganizationRoleDto[];
 }
 
 export class ForgetPasswordDto {

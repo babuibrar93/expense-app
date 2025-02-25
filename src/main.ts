@@ -2,6 +2,7 @@ import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/exception.filter';
 
@@ -11,10 +12,13 @@ async function bootstrap() {
 
   // Enable CORS
   app.enableCors({
-    origin: '*', // Allow all origins in development
+    origin: ['http://localhost:4200'], // Allow all origins in development
     credentials: true,
-    allowedHeaders: 'Content-Type, Accept, Authorization',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Accept', 'Authorization', 'Cookie'],
   });
+
+  app.use(cookieParser());
 
   // Apply the Exception Filter
   app.useGlobalFilters(new GlobalExceptionFilter());
@@ -45,15 +49,18 @@ async function bootstrap() {
 
   await app.listen(PORT, () => {
     console.log(`Server is & running on port ${PORT}`);
+    console.log(`Swagger Docs available at: http://localhost:${PORT}/api/docs`);
   });
 
   // Enable better debugging with full stack traces
   process.on('uncaughtException', (err) => {
     console.error('Uncaught Exception:', err.stack);
+    process.exit(1); // Force exit to prevent corrupted state
   });
 
   process.on('unhandledRejection', (reason) => {
     console.error('Unhandled Rejection:', reason);
+    process.exit(1); // Ensure the process restarts properly
   });
 }
 bootstrap();

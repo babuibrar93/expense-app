@@ -18,9 +18,11 @@ export const GeneralError = {
 export const OrganizationError = {
   alreadyExists: 'Organization already exists',
   notFound: 'Organization not found',
+  userNotFound: 'User is not part of this organization.',
 } as const;
 
 export const RoleError = {
   alreadyExists: 'Role already exists',
   notFound: 'Role not found',
+  userAlreadyHasRole: 'User already has this role in the organization.',
 } as const;

@@ -6,15 +6,14 @@ import { UserEntity } from './user.entity';
 
 @Entity({ name: 'UserOrganization' })
 export class UserOrganizationEntity extends BaseEntity {
-  @ManyToOne(() => UserEntity, (user) => user.UserOrganization)
+  @ManyToOne(() => UserEntity, (user) => user.UserOrganization, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'UserId' })
   User: UserEntity;
 
-  @ManyToOne(() => OrganizationEntity, (organization) => organization.UserOrganization)
+  @ManyToOne(() => OrganizationEntity, (organization) => organization.UserOrganization, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'OrganizationId' })
   Organization: OrganizationEntity;
 
   @OneToMany(() => UserOrganizationRoleEntity, (uor) => uor.UserOrganization)
-  @JoinColumn({ name: 'RoleId' })
   UserOrganizationRole: UserOrganizationRoleEntity[];
 }
