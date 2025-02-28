@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { ModuleEntity } from './module.entity';
 
@@ -8,7 +8,6 @@ export class FunctionEntity extends BaseEntity {
   Name: string;
 
   @ManyToOne(() => ModuleEntity, (module) => module.Functions, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'ModuleId' }) 
+  @JoinColumn({ name: 'ModuleId' })
   Module: ModuleEntity;
-  
 }

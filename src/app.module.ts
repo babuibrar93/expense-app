@@ -5,9 +5,12 @@ import { AuthModule } from './auth/auth.module';
 import { JwtStrategy } from './auth/strategies/jwt.strategy';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { typeOrmConfig } from './core/config/typeorm.config';
-import { OrganizationModule } from './organizations/organization.module';
-import { RoleModule } from './roles/role.module';
-import { UserModule } from './users/user.module';
+import { ModuleModule } from './modules/modules.module';
+import { OrganizationModule } from './organizations/organizations.module';
+import { RoleModule } from './roles/roles.module';
+import { UserModule } from './users/users.module';
+import { ExpenseModule } from './expenses/expenses.module';
+import { SuperAdminSeeder } from './core/database/seeders/super-admin.seeder';
 
 @Module({
   imports: [
@@ -22,10 +25,13 @@ import { UserModule } from './users/user.module';
     }),
     AuthModule,
     UserModule,
-    OrganizationModule,
     RoleModule,
+    ModuleModule,
+    ExpenseModule,
+    OrganizationModule,
   ],
-  providers: [JwtStrategy],
+  providers: [JwtStrategy, SuperAdminSeeder],
+  exports: [SuperAdminSeeder],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

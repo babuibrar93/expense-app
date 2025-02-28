@@ -31,23 +31,7 @@ export class CreateOrganizationDto {
   Description?: string;
 }
 
-export class UpdateOrganizationDto extends PartialType(CreateOrganizationDto) {
-  @ApiPropertyOptional({
-    example: 'DEC8423E-F36B-1410-8074-00FF2F75E0BD',
-    description: 'ID of the user to add in organization',
-  })
-  @IsUUID()
-  @IsOptional()
-  UserId: string;
-
-  @ApiPropertyOptional({
-    example: 'DEC8423E-F36B-1410-8074-00FF2F75E0BD',
-    description: 'ID of the role to assign user',
-  })
-  @IsUUID()
-  @IsOptional()
-  RoleId: string;
-}
+export class UpdateOrganizationDto extends PartialType(CreateOrganizationDto) {}
 
 export class OrganizationIdDto {
   @ApiProperty({

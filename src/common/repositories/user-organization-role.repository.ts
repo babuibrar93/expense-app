@@ -1,6 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { REQUEST } from '@nestjs/core';
-import { Request } from 'express';
+import { Injectable } from '@nestjs/common';
 import { UserOrganizationRoleEntity } from 'src/core/database/entities/user-organization-role.entity';
 import { DataSource, FindOptionsWhere } from 'typeorm';
 import { BaseRepository } from './base.repository';
@@ -11,13 +9,14 @@ export class UserOrganizationRoleRepository extends BaseRepository<UserOrganizat
     super(dataSource, UserOrganizationRoleEntity);
   }
 
-  getORMMethods() {
-    return this.getRepository();
+  getORMMethods(request?: any) {
+    return this.getRepository(request);
   }
 
   findOneRecord(
-    conditions: FindOptionsWhere<UserOrganizationRoleEntity>
+    conditions: FindOptionsWhere<UserOrganizationRoleEntity>,
+    request?: any
   ): Promise<UserOrganizationRoleEntity> {
-    return this.getORMMethods().findOne({ where: conditions });
+    return this.getRepository(request).findOne({ where: conditions });
   }
 }

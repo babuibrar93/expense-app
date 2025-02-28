@@ -1,6 +1,6 @@
 src/
 ├── auth/                            # Authentication Module (Login, Signup, JWT, etc.)
-│   ├── dto/                         # Data Transfer Objects (DTOs) for request validation
+│   ├── dtos/                         # Data Transfer Objects (DTOs) for request validation
 │   ├── interfaces/                  # Interfaces for services and repository patterns
 │   ├── jobs/                        # Workers for background tasks (e.g., email verification)
 │   ├── auth.service.ts              # Service layer (Business logic for authentication)
@@ -8,10 +8,10 @@ src/
 │   ├── auth.module.ts               # NestJS module definition
 │
 ├── user/                            # User Module (Profile, Roles, etc.)
-│   ├── dto/                         # User-related DTOs (e.g., update profile)
+│   ├── dtos/                         # User-related DTOs (e.g., update profile)
 │   ├── interfaces/                  # User-related interfaces for strong typing
 │   ├── user.service.ts              # Business logic for user management
-│   ├── user.controller.ts           # API routes for user management
+│   ├── users.controller.ts           # API routes for user management
 │   ├── user.module.ts               # NestJS module for users
 │
 ├── common/                          # Common utilities and cross-cutting concerns

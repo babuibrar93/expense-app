@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { UserRepository } from 'src/common/repositories/user.repository';
-import { UserController } from './user.controller';
+import { UserController } from './users.controller';
 import { UserService } from './user.service';
 import { AuthModule } from 'src/auth/auth.module';
 import { BcryptService } from 'src/common/services/bcrypt.service';

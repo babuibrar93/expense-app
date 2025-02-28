@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { UserEntity } from 'src/core/database/entities/user.entity';
-import { DataSource, FindOptionsWhere, QueryRunner } from 'typeorm';
+import { DataSource, FindOptionsWhere } from 'typeorm';
 import { BaseRepository } from './base.repository';
-import { GeneralError } from '../constants/basic.errors';
+import { REQUEST } from '@nestjs/core';
 
 @Injectable()
 export class UserRepository extends BaseRepository<UserEntity> {
@@ -10,15 +10,16 @@ export class UserRepository extends BaseRepository<UserEntity> {
     super(dataSource, UserEntity);
   }
 
-  getORMMethods() {
-    return this.getRepository();
+  getORMMethods(request?: any) {
+    return this.getRepository(request);
   }
 
   async findOneRecord(
     conditions: FindOptionsWhere<UserEntity>,
-    relations?: { relations: boolean }
+    relations?: { relations: boolean },
+    request?: any
   ): Promise<UserEntity> {
-    return await this.getRepository().findOne({
+    return await this.getRepository(request).findOne({
       where: { ...conditions },
       relations: relations?.relations
         ? [

@@ -7,19 +7,21 @@ import {
   Param,
   Post,
   Put,
+  Req,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import { ApiResponse } from 'src/common/dto/api-response.dto';
+import { ApiResponse } from 'src/common/dtos/api-response.dto';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { RoleGuard } from 'src/common/guards/role.guard';
+import { TransactionInterceptor } from 'src/common/interceptors/transaction.interceptor';
 import { RoleEntity } from 'src/core/database/entities/role.entity';
 import { UserEntity } from 'src/core/database/entities/user.entity';
-import { AssignRoleDto, CreateRoleDto, updateRoleDto } from './dto/role.dto';
+import { AssignModulesToRoleDto, CreateRoleDto, updateRoleDto } from './dtos/roles.dto';
 import { RoleService } from './role.service';
-import { RoleGuard } from 'src/common/guards/role.guard';
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { Role } from 'src/common/types/basic.enum';
-import { Roles } from 'src/common/decorators/role.decorator';
+import { Request } from 'express';
 
 @Controller('role')
 @ApiTags('Role')
@@ -29,24 +31,31 @@ export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 
   @Post()
-  async createRole(@Body() dto: CreateRoleDto): Promise<ApiResponse<RoleEntity>> {
-    const response = await this.roleService.create(dto);
+  @ApiOperation({ summary: 'Create a new role' })
+  async createRole(
+    @Body() dto: CreateRoleDto,
+    @CurrentUser() currentUser: UserEntity
+  ): Promise<ApiResponse<RoleEntity>> {
+    const response = await this.roleService.create(dto, currentUser);
     return new ApiResponse(true, HttpStatus.CREATED, 'Role created successfully', response);
   }
 
   @Get()
+  @ApiOperation({ summary: 'Get all roles' })
   async getAllRoles(): Promise<ApiResponse<RoleEntity[]>> {
     const response = await this.roleService.getAll();
     return new ApiResponse(true, HttpStatus.OK, 'All roles fetched successfully', response);
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get role by ID' })
   async getRoleById(@Param('id') id: string): Promise<ApiResponse<RoleEntity>> {
     const response = await this.roleService.getRoleById(id);
     return new ApiResponse(true, HttpStatus.OK, 'Role fetched successfully', response);
   }
 
   @Put(':id')
+  @ApiOperation({ summary: 'Update a role by ID' })
   async updateRole(
     @Param('id') id: string,
     @Body() dto: updateRoleDto
@@ -56,16 +65,25 @@ export class RoleController {
   }
 
   @Delete(':id')
-  async deleteRole(@Param('id') id: string): Promise<unknown> {
+  @ApiOperation({ summary: 'Delete a role by ID' })
+  async deleteRole(@Param('id') id: string): Promise<ApiResponse<null>> {
     await this.roleService.deleteRole(id);
-    return new ApiResponse(true, HttpStatus.OK, 'Role deleted successfully');
+    return new ApiResponse(true, HttpStatus.OK, 'Role deleted successfully', null);
   }
 
-  @Post('assign-role')
-  @Roles(Role.SUPER_ADMIN)
-  @ApiOperation({ summary: 'Assign role to user' })
-  async assignRoleToUser(@Body() body: AssignRoleDto, @CurrentUser() currentUser: UserEntity) {
-    const response = await this.roleService.assignRoleToUser(body, currentUser);
+  @Post('assign-role-to-module')
+  @UseInterceptors(TransactionInterceptor)
+  @ApiOperation({ summary: 'Assign a role to modules with permissions' })
+  async assignModulesToRole(
+    @Body() assignModulesToRoleDto: AssignModulesToRoleDto,
+    @CurrentUser() currentUser: UserEntity,
+    @Req() request: Request
+  ) {
+    const response = await this.roleService.assignModulesToRole(
+      assignModulesToRoleDto,
+      currentUser,
+      request
+    );
     return new ApiResponse(true, HttpStatus.OK, 'Role assigned successfully', response);
   }
 }

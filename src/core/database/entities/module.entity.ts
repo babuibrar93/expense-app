@@ -5,8 +5,11 @@ import { FunctionEntity } from './function.entity';
 
 @Entity({ name: 'Module' })
 export class ModuleEntity extends BaseEntity {
-  @Column({ type: 'varchar', length: 255, nullable: false })
+  @Column({ type: 'varchar', length: 255, nullable: false, unique: true })
   Name: string;
+
+  @Column({ type: 'nvarchar', length: 255, nullable: false, unique: true })
+  ModuleCode: string;
 
   @OneToMany(() => RoleModuleEntity, (rm) => rm.Module)
   RoleModule: RoleModuleEntity[];

@@ -13,11 +13,11 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/common/decorators/role.decorator';
-import { ApiResponse } from 'src/common/dto/api-response.dto';
+import { ApiResponse } from 'src/common/dtos/api-response.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RoleGuard } from 'src/common/guards/role.guard';
 import { Role } from 'src/common/types/basic.enum';
-import { FindUserDto, GetUsersDto, UpdateUserDto } from './dto/user.dto';
+import { FindUserDto, GetUsersDto, UpdateUserDto } from './dtos/users.dto';
 import { UserService } from './user.service';
 
 @Controller('user')

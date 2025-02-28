@@ -7,10 +7,14 @@ export class TransactionInterceptor implements NestInterceptor {
   constructor(private dataSource: DataSource) {}
 
   async intercept(context: ExecutionContext, next: CallHandler<any>): Promise<Observable<any>> {
+    const request = context.switchToHttp().getRequest();
+
     const queryRunner: QueryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
+
     // attach query manager with transaction to the request
+    request.queryRunner = queryRunner;
 
     return next.handle().pipe(
       // concatMap gets called when route handler completes successfully

@@ -2,7 +2,6 @@ import { Exclude } from 'class-transformer';
 import { Column, Entity, Index, OneToMany } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { UserOrganizationEntity } from './user-organization.entity';
-import { Role } from 'src/common/types/basic.enum';
 
 @Entity({ name: 'User' })
 export class UserEntity extends BaseEntity {

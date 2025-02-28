@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { AuthError } from 'src/common/constants/basic.errors';
+import { AuthErrors } from 'src/common/constants/basic.errors';
 import { UserRepository } from 'src/common/repositories/user.repository';
 import { BcryptService } from 'src/common/services/bcrypt.service';
 import { UserEntity } from 'src/core/database/entities/user.entity';
-import { GetUsersDto, UpdateUserDto } from './dto/user.dto';
+import { GetUsersDto, UpdateUserDto } from './dtos/users.dto';
 
 @Injectable()
 export class UserService {
@@ -43,7 +43,7 @@ export class UserService {
 
   async findOneUserById(id: string): Promise<UserEntity> {
     const user = await this.userRepository.findOneRecord({ Id: id }, { relations: true });
-    if (!user) throw new NotFoundException(AuthError.UserNotFound);
+    if (!user) throw new NotFoundException(AuthErrors.USER_NOT_FOUND);
     return user;
   }
 
@@ -53,14 +53,14 @@ export class UserService {
     const hashedPassword = await this.bcryptService.hashPassword(Password);
 
     const user = await this.userRepository.findOneRecord({ Id: id });
-    if (!user) throw new NotFoundException(AuthError.UserNotFound);
+    if (!user) throw new NotFoundException(AuthErrors.USER_NOT_FOUND);
     Object.assign(user, { ...updateUserDto, Password: hashedPassword });
     return await this.userRepository.getORMMethods().save(user);
   }
 
   async removeUser(id: string): Promise<boolean> {
     const user = await this.userRepository.findOneRecord({ Id: id });
-    if (!user) throw new NotFoundException(AuthError.UserNotFound);
+    if (!user) throw new NotFoundException(AuthErrors.USER_NOT_FOUND);
 
     await this.userRepository.getORMMethods().softDelete(user.Id);
     return true;

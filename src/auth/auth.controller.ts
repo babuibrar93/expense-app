@@ -4,6 +4,8 @@ import {
   Controller,
   Get,
   HttpStatus,
+  Param,
+  Patch,
   Post,
   Req,
   Res,
@@ -12,14 +14,20 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { AUTH_TOKEN } from 'src/common/constants/basic.constant';
-import { ApiResponse } from 'src/common/dto/api-response.dto';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { Roles } from 'src/common/decorators/role.decorator';
+import { ApiResponse } from 'src/common/dtos/api-response.dto';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { RoleGuard } from 'src/common/guards/role.guard';
+import { TransactionInterceptor } from 'src/common/interceptors/transaction.interceptor';
+import { Role } from 'src/common/types/basic.enum';
 import { AuthenticatedRequest } from 'src/common/types/request.interface';
 import { UserEntity } from 'src/core/database/entities/user.entity';
 import { AuthService } from './auth.service';
-import { LoginDto, RegisterDto } from './dto/auth.dto';
+import { AddUserDto, LoginDto, RegisterDto, UpdateUserDto } from './dtos/auth.dto';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -120,7 +128,58 @@ export class AuthController {
   }
 
   @Get('token')
+  @ApiOperation({ summary: 'Get token when login with social auth' })
   getToken(@Req() req: Request) {
     return this.authService.getTokenFromCookie(req);
+  }
+
+  @Post('add-user')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(Role.SUPER_ADMIN, Role.ORG_ADMIN)
+  @UseInterceptors(TransactionInterceptor)
+  @ApiOperation({ summary: 'Add user to organization and assign role' })
+  async addUserToOrganizationAndAssignRole(
+    @Body() addUserDto: AddUserDto,
+    @CurrentUser() user: UserEntity,
+    @Req() request: Request
+  ) {
+    const response = await this.authService.addUserToOrganizationAndAssignRole(
+      addUserDto,
+      user,
+      request
+    );
+    return new ApiResponse(
+      true,
+      HttpStatus.CREATED,
+      'User successfully added to organization and assigned role.',
+      response
+    );
+  }
+
+  @Patch('update-user/:userId')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(Role.SUPER_ADMIN, Role.ORG_ADMIN)
+  @UseInterceptors(TransactionInterceptor)
+  @ApiOperation({ summary: 'Update user role in organization' })
+  async updateUserRoleInOrganization(
+    @Param('userId') userId: string,
+    @Body() updateUserDto: UpdateUserDto,
+    @CurrentUser() user: UserEntity,
+    @Req() req: Request
+  ) {
+    const response = await this.authService.updateUserRoleInOrganization(
+      userId,
+      updateUserDto,
+      user,
+      req
+    );
+    return new ApiResponse(
+      true,
+      HttpStatus.CREATED,
+      'User role is successfully updated.',
+      response
+    );
   }
 }

@@ -4,7 +4,7 @@ import { OrganizationRepository } from 'src/common/repositories/organization.rep
 import { RoleRepository } from 'src/common/repositories/role.repository';
 import { UserOrganizationRoleRepository } from 'src/common/repositories/user-organization-role.repository';
 import { UserOrganizationRepository } from 'src/common/repositories/user-organization.repository';
-import { OrganizationController } from './organization.controller';
+import { OrganizationController } from './organizations.controller';
 import { OrganizationService } from './organization.service';
 import { UserRepository } from 'src/common/repositories/user.repository';
 

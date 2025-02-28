@@ -5,10 +5,14 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/exception.filter';
+import { SuperAdminSeeder } from './core/database/seeders/super-admin.seeder';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
+
+  const seeder = app.get(SuperAdminSeeder)
+  await seeder.seed()
 
   // Enable CORS
   app.enableCors({

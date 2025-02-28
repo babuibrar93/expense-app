@@ -8,12 +8,15 @@ export class RoleRepository extends BaseRepository<RoleEntity> {
     super(dataSource, RoleEntity);
   }
 
-  getORMMethods() {
-    return this.getRepository();
+  getORMMethods(request?: any) {
+    return this.getRepository(request);
   }
 
-  async findOneRecord(conditions: FindOptionsWhere<RoleEntity>): Promise<RoleEntity> {
+  async findOneRecord(
+    conditions: FindOptionsWhere<RoleEntity>,
+    request?: any
+  ): Promise<RoleEntity> {
     const where: FindOptionsWhere<RoleEntity> = { ...conditions };
-    return await this.getORMMethods().findOne({ where });
+    return this.getRepository(request).findOne({ where });
   }
 }

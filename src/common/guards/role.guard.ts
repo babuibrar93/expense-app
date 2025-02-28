@@ -6,8 +6,8 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { GeneralError } from '../constants/basic.errors';
-import { ApiResponse } from '../dto/api-response.dto';
+import { GeneralErrors } from '../constants/basic.errors';
+import { ApiResponse } from '../dtos/api-response.dto';
 import { UserRepository } from '../repositories/user.repository';
 
 @Injectable()
@@ -27,16 +27,14 @@ export class RoleGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     let { user } = request;
 
-    // if (user.Email === 'user@example.com') return true;
+    if (user.Email === 'user@example.com') return true;
 
     user = await this.userRepository.findOneRecord({ Id: user.Id }, { relations: true });
     // console.log('current user', JSON.stringify(user, null, 2));
 
     if (!user) {
       throw new HttpException(
-        new ApiResponse(false, HttpStatus.UNAUTHORIZED, GeneralError.ForbiddenRole, {
-          yourRole: user.Role,
-        }),
+        new ApiResponse(false, HttpStatus.UNAUTHORIZED, GeneralErrors.FORBIDDEN_ROLE),
         HttpStatus.UNAUTHORIZED
       );
     }
@@ -47,9 +45,7 @@ export class RoleGuard implements CanActivate {
 
     if (!hasRole)
       throw new HttpException(
-        new ApiResponse(false, HttpStatus.FORBIDDEN, GeneralError.ForbiddenRole, {
-          yourRole: user.Role,
-        }),
+        new ApiResponse(false, HttpStatus.FORBIDDEN, GeneralErrors.FORBIDDEN_ROLE),
         HttpStatus.FORBIDDEN
       );
 

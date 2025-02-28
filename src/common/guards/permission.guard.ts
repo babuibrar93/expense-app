@@ -1,9 +1,16 @@
-import { CanActivate, ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
-import { ApiResponse } from '../dto/api-response.dto';
-import { GeneralError } from '../constants/basic.errors';
+import { ApiResponse } from '../dtos/api-response.dto';
+import { GeneralErrors } from '../constants/basic.errors';
 
+@Injectable()
 export class PermissionGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
@@ -20,7 +27,7 @@ export class PermissionGuard implements CanActivate {
 
     if (!hasPermissions) {
       throw new HttpException(
-        new ApiResponse(false, HttpStatus.FORBIDDEN, GeneralError.forbiddenPermission),
+        new ApiResponse(false, HttpStatus.FORBIDDEN, GeneralErrors.FORBIDDEN_PERMISSION),
         HttpStatus.FORBIDDEN
       );
     }
