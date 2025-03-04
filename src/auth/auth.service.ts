@@ -8,20 +8,11 @@ import { JwtService } from '@nestjs/jwt';
 import axios from 'axios';
 import { Request } from 'express';
 import { AUTH_TOKEN } from 'src/common/constants/basic.constant';
-import {
-  AuthErrors,
-  GeneralErrors,
-  OrganizationErrors,
-  RoleErrors,
-} from 'src/common/constants/basic.errors';
-import { OrganizationRepository } from 'src/common/repositories/organization.repository';
-import { RoleRepository } from 'src/common/repositories/role.repository';
-import { UserOrganizationRoleRepository } from 'src/common/repositories/user-organization-role.repository';
-import { UserOrganizationRepository } from 'src/common/repositories/user-organization.repository';
+import { AuthErrors } from 'src/common/constants/basic.errors';
 import { UserRepository } from 'src/common/repositories/user.repository';
 import { BcryptService } from 'src/common/services/bcrypt.service';
 import { UserEntity } from 'src/core/database/entities/user.entity';
-import { AddUserDto, LoginDto, RegisterDto, UpdateUserDto } from './dtos/auth.dto';
+import { LoginDto, RegisterDto } from './dtos/auth.dto';
 import { ILoginResponse, IOAuthUser } from './interfaces/auth.interface';
 
 @Injectable()
@@ -31,11 +22,7 @@ export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly userRepository: UserRepository,
-    private readonly bcryptService: BcryptService,
-    private readonly roleRepository: RoleRepository,
-    private readonly organizationRepository: OrganizationRepository,
-    private readonly userOrganizationRepository: UserOrganizationRepository,
-    private readonly userOrganizationRoleRepository: UserOrganizationRoleRepository
+    private readonly bcryptService: BcryptService
   ) {}
 
   async register(data: RegisterDto): Promise<UserEntity> {
@@ -125,116 +112,5 @@ export class AuthService {
   async getTokenFromCookie(req: Request) {
     const token = req.cookies[AUTH_TOKEN]; // Read token from cookie
     return { token };
-  }
-
-  async addUserToOrganizationAndAssignRole(
-    addUserDto: AddUserDto,
-    currentUser: UserEntity,
-    request: Request
-  ) {
-    const { RoleId, OrganizationId, FullName, Email, Password } = addUserDto;
-
-    // Use repositories with transaction support
-    const userOrgRepo = this.userOrganizationRepository.getORMMethods(request);
-    const userOrgRoleRepo = this.userOrganizationRoleRepository.getORMMethods(request);
-
-    // Ensure user does not already exist
-    const existingUser = await this.userRepository.findOneRecord({ Email });
-    if (existingUser) throw new ConflictException(AuthErrors.USER_ALREADY_EXISTS);
-
-    // Fetch role and organization
-    const role = await this.roleRepository.findOneRecord({ Id: RoleId });
-    if (!role) throw new NotFoundException(RoleErrors.ROLE_NOT_FOUND);
-
-    const organization = await this.organizationRepository.findOneRecord({ Id: OrganizationId });
-    if (!organization) throw new NotFoundException(OrganizationErrors.ORGANIZATION_NOT_FOUND);
-
-    // Register the user
-    const user = await this.register({ FullName, Email, Password });
-
-    // Check if user is already assigned to the organization
-    let userOrganization = await userOrgRepo.findOne({
-      where: { User: { Id: user.Id }, Organization: { Id: OrganizationId } },
-    });
-
-    if (!userOrganization) {
-      userOrganization = await userOrgRepo.save({
-        User: { Id: user.Id },
-        Organization: { Id: OrganizationId },
-        CreatedBy: currentUser,
-      });
-    }
-
-    // Ensure the user does not already have the role
-    const userOrganizationRoleExists = await userOrgRoleRepo.findOne({
-      where: { UserOrganization: { Id: userOrganization.Id }, Role: { Id: role.Id } },
-    });
-
-    if (userOrganizationRoleExists)
-      throw new BadRequestException(OrganizationErrors.USER_ALREADY_HAS_ROLE_IN_ORGANIZATION);
-
-    // Assign the role to the user in the organization
-    return await userOrgRoleRepo.save({
-      UserOrganization: userOrganization,
-      Role: role,
-      CreatedBy: currentUser,
-    });
-  }
-
-  async updateUserRoleInOrganization(
-    userId: string,
-    updateUserDto: UpdateUserDto,
-    currentUser: UserEntity,
-    request: Request
-  ) {
-    const { RoleId, OrganizationId, FullName, Email, Password } = updateUserDto;
-
-    if (!RoleId && !OrganizationId)
-      throw new BadRequestException(GeneralErrors.ROLE_ORGANIZATION_REQUIRED);
-
-    const userRepo = this.userRepository.getORMMethods(request);
-    const roleRepo = this.roleRepository.getORMMethods(request);
-    const orgRepo = this.organizationRepository.getORMMethods(request);
-    const userOrgRepo = this.userOrganizationRepository.getORMMethods(request);
-    const userOrgRoleRepo = this.userOrganizationRoleRepository.getORMMethods(request);
-
-    // Fetch user, role, and organization in parallel
-    const [existingUser, role, organization] = await Promise.all([
-      userRepo.findOne({ where: { Id: userId } }),
-      roleRepo.findOne({ where: { Id: RoleId } }),
-      orgRepo.findOne({ where: { Id: OrganizationId } }),
-    ]);
-
-    if (!existingUser) throw new NotFoundException(AuthErrors.USER_NOT_FOUND);
-    if (!role) throw new NotFoundException(RoleErrors.ROLE_NOT_FOUND);
-    if (!organization) throw new NotFoundException(OrganizationErrors.ORGANIZATION_NOT_FOUND);
-
-    if (Email) existingUser.Email = Email;
-    if (FullName) existingUser.FullName = FullName;
-    if (Password) existingUser.Password = await this.bcryptService.hashPassword(Password);
-
-    await userRepo.save(existingUser);
-
-    // Check if user is already assigned to the organization
-    let userOrganization = await userOrgRepo.findOne({
-      where: { User: { Id: existingUser.Id }, Organization: { Id: OrganizationId } },
-    });
-
-    if (!userOrganization) throw new NotFoundException(OrganizationErrors.USER_NOT_IN_ORGANIZATION);
-
-    // Ensure the user does not already have the role
-    const userOrganizationRoleExists = await userOrgRoleRepo.findOne({
-      where: { UserOrganization: { Id: userOrganization.Id }, Role: { Id: role.Id } },
-    });
-
-    if (userOrganizationRoleExists)
-      throw new BadRequestException(OrganizationErrors.USER_ALREADY_HAS_ROLE_IN_ORGANIZATION);
-
-    // Assign the role to the user in the organization
-    return await userOrgRoleRepo.save({
-      UserOrganization: userOrganization,
-      Role: role,
-      CreatedBy: currentUser,
-    });
   }
 }

@@ -1,9 +1,11 @@
 import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { Roles } from 'src/common/decorators/role.decorator';
 import { ApiResponse } from 'src/common/dtos/api-response.dto';
 import { Role } from 'src/common/types/basic.enum';
 import { ModuleEntity } from 'src/core/database/entities/module.entity';
+import { UserEntity } from 'src/core/database/entities/user.entity';
 import { CreateModuleDto, UpdateModuleDto } from 'src/modules/dtos/module.dto';
 import { ModuleService } from 'src/modules/module.service';
 
@@ -16,8 +18,11 @@ export class ModuleController {
   @Post()
   @Roles(Role.SUPER_ADMIN, Role.ORG_ADMIN)
   @ApiOperation({ summary: 'Create a new module' })
-  async createModule(@Body() createModuleDto: CreateModuleDto): Promise<ApiResponse<ModuleEntity>> {
-    const response = await this.moduleService.createModule(createModuleDto);
+  async createModule(
+    @Body() createModuleDto: CreateModuleDto,
+    @CurrentUser() currentUser: UserEntity
+  ): Promise<ApiResponse<ModuleEntity>> {
+    const response = await this.moduleService.createModule(createModuleDto, currentUser);
     return new ApiResponse(true, HttpStatus.CREATED, 'Module created successfully', response);
   }
 

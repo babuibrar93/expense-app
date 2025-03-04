@@ -1,7 +1,9 @@
-import { ExpenseStatus } from 'src/common/types/expense.enum';
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, ManyToOne, JoinColumn } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { OrganizationEntity } from './organization.entity';
+import { ExpenseTypeEntity } from './expense-type.entity';
+import { ExpenseCategoryEntity } from './expense-category.entity';
+import { ExpenseStatus } from 'src/common/types/expense.enum';
 
 @Entity('Expense')
 export class ExpenseEntity extends BaseEntity {
@@ -20,9 +22,6 @@ export class ExpenseEntity extends BaseEntity {
   @Column({ type: 'date', nullable: false })
   ExpenseDate: Date;
 
-  @Column({ type: 'nvarchar', length: 100, nullable: false })
-  Category: string;
-
   @Column({ type: 'varchar', length: 50, enum: ExpenseStatus, default: ExpenseStatus.PENDING })
   Status: ExpenseStatus;
 
@@ -32,4 +31,12 @@ export class ExpenseEntity extends BaseEntity {
   })
   @JoinColumn({ name: 'OrganizationId' })
   Organization: OrganizationEntity;
+
+  @ManyToOne(() => ExpenseTypeEntity, { eager: true, nullable: false })
+  @JoinColumn({ name: 'TypeId' })
+  Type: ExpenseTypeEntity;
+
+  @ManyToOne(() => ExpenseCategoryEntity, { eager: true, nullable: false })
+  @JoinColumn({ name: 'CategoryId' })
+  Category: ExpenseCategoryEntity;
 }

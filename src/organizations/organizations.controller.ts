@@ -37,7 +37,7 @@ export class OrganizationController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new organization' })
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.ORG_ADMIN)
   @UseInterceptors(TransactionInterceptor)
   async create(
     @Body() createOrganizationDto: CreateOrganizationDto,
@@ -49,7 +49,7 @@ export class OrganizationController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update an existing organization and assign role to user' })
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.ORG_ADMIN)
   async update(
     @Param('id') id: string,
     @CurrentUser() user: UserEntity,
@@ -61,7 +61,7 @@ export class OrganizationController {
 
   @Get('/:organizationId/users')
   @ApiOperation({ summary: 'Get users of an organization' })
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.ORG_ADMIN)
   async getUsersByOrganization(
     @Param('organizationId') id: string,
     @Query() query: GetOrganizationDto
@@ -77,7 +77,7 @@ export class OrganizationController {
 
   @Get()
   @ApiOperation({ summary: 'Get all organizations' })
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.ORG_ADMIN)
   async findAll(
     @Query() query: GetOrganizationDto
   ): Promise<ApiResponse<{ organizations: OrganizationEntity[]; total: number }>> {
@@ -87,7 +87,7 @@ export class OrganizationController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get an organization by ID' })
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.ORG_ADMIN)
   async findOne(@Param('id') id: string): Promise<ApiResponse<OrganizationEntity>> {
     const response = await this.organizationService.findOne(id);
     return new ApiResponse(true, HttpStatus.OK, 'Organization retrieved successfully', response);
@@ -95,7 +95,7 @@ export class OrganizationController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete an organization by ID' })
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.ORG_ADMIN)
   async remove(@Param('id') id: string): Promise<unknown> {
     await this.organizationService.remove(id);
     return new ApiResponse(true, HttpStatus.OK, 'Organization deleted successfully');

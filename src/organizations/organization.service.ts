@@ -15,6 +15,7 @@ import {
   GetOrganizationDto,
   UpdateOrganizationDto,
 } from './dtos/organization.dto';
+import { SuperAdmin } from 'src/common/constants/super-admin.constant';
 
 @Injectable()
 export class OrganizationService {
@@ -79,10 +80,16 @@ export class OrganizationService {
   ): Promise<{ organizations: OrganizationEntity[]; total: number }> {
     const { page = 1, limit = 10, search, sortBy = 'CreatedAt', order = 'DESC' } = query;
 
-    const qb = this.organizationRepository.getORMMethods().createQueryBuilder('organization');
+    const qb = this.organizationRepository
+      .getORMMethods()
+      .createQueryBuilder('organization')
+      .leftJoinAndSelect('organization.UserOrganization', 'userOrganization')
+      .where('organization.Name != :organizationName', {
+        organizationName: SuperAdmin.organizationName,
+      });
 
     if (search) {
-      qb.where('organization.Name LIKE :search', { search: `%${search}%` });
+      qb.andWhere('organization.Name LIKE :search', { search: `%${search}%` });
     }
 
     const [organizations, total] = await qb
@@ -94,8 +101,8 @@ export class OrganizationService {
     return { organizations, total };
   }
 
-  async findOne(id: string): Promise<OrganizationEntity> {
-    return await this.organizationRepository.getORMMethods().findOne({ where: { Id: id } });
+  async findOne(Id: string): Promise<OrganizationEntity> {
+    return await this.organizationRepository.findOneRecord({ Id }, { relations: true });
   }
 
   async update(
@@ -159,7 +166,7 @@ export class OrganizationService {
     const organization = await this.findOne(id);
     if (!organization) throw new BadRequestException(OrganizationErrors.ORGANIZATION_NOT_FOUND);
 
-    await this.organizationRepository.getORMMethods().remove(organization);
+    await this.organizationRepository.getORMMethods().softDelete(organization.Id);
   }
 
   async getUsersByOrganization(

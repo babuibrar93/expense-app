@@ -1,10 +1,10 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsString, IsUUID, Matches, MinLength } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsNotEmpty, IsString, Matches, MinLength } from 'class-validator';
 
 /** Login DTO */
 export class LoginDto {
   @ApiProperty({
-    example: 'user@example.com',
+    example: 'superadmin@example.com',
     description: 'The email of the user',
     required: true,
   })
@@ -13,7 +13,7 @@ export class LoginDto {
   Email: string;
 
   @ApiProperty({
-    example: 'StrongP@ssw0rd!',
+    example: 'SuperAdmin@123',
     description: 'The password of the user (must be at least 6 characters)',
     required: true,
     minLength: 6,
@@ -47,25 +47,3 @@ export class ForgetPasswordDto {
   @IsNotEmpty({ message: 'Email is required' })
   Email: string;
 }
-
-export class AddUserDto extends RegisterDto {
-  @ApiProperty({
-    example: 'F7C8423E-F36B-1410-8074-00FF2F75E0BD',
-    description: 'Id of role to assign user',
-    required: true,
-  })
-  @IsUUID()
-  @IsNotEmpty()
-  OrganizationId: string;
-
-  @ApiProperty({
-    example: 'F7C8423E-F36B-1410-8074-00FF2F75E0BD',
-    description: 'Id of role to assign user',
-    required: true,
-  })
-  @IsUUID()
-  @IsNotEmpty()
-  RoleId: string;
-}
-
-export class UpdateUserDto extends PartialType(AddUserDto) {}

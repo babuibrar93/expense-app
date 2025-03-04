@@ -27,8 +27,6 @@ export class RoleGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     let { user } = request;
 
-    if (user.Email === 'user@example.com') return true;
-
     user = await this.userRepository.findOneRecord({ Id: user.Id }, { relations: true });
     // console.log('current user', JSON.stringify(user, null, 2));
 

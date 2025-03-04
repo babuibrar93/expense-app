@@ -6,19 +6,23 @@ import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/exception.filter';
 import { SuperAdminSeeder } from './core/database/seeders/super-admin.seeder';
+import { ExpenseSeeder } from './core/database/seeders/expense.seeder';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
-  const seeder = app.get(SuperAdminSeeder)
-  await seeder.seed()
+  const superAdminSeeder = app.get(SuperAdminSeeder);
+  await superAdminSeeder.seed();
+
+  const expenseSeeder = app.get(ExpenseSeeder);
+  await expenseSeeder.seed();
 
   // Enable CORS
   app.enableCors({
     origin: ['http://localhost:4200'], // Allow all origins in development
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Accept', 'Authorization', 'Cookie'],
   });
 

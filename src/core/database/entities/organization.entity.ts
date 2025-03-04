@@ -15,6 +15,9 @@ export class OrganizationEntity extends BaseEntity {
   Phone: string;
 
   @Column({ type: 'text', nullable: true })
+  Address: string;
+
+  @Column({ type: 'text', nullable: true })
   Description: string;
 
   @OneToMany(() => UserOrganizationEntity, (uo) => uo.Organization)

@@ -5,7 +5,7 @@ import { UserOrganizationRoleEntity } from './user-organization-role.entity';
 
 @Entity({ name: 'Role' })
 export class RoleEntity extends BaseEntity {
-  @Index({ unique: true }) // Ensures unique role names
+  @Index()
   @Column({ type: 'varchar', length: 255, nullable: false })
   Name: string;
 

@@ -7,6 +7,11 @@ export class CreateModuleDto {
   @IsNotEmpty()
   Name: string;
 
+  @ApiProperty({ example: '73hdu38' })
+  @IsString()
+  @IsNotEmpty()
+  ModuleCode: string;
+
   @ApiPropertyOptional({ example: 'UUID-of-Parent-Module', required: false })
   @IsUUID()
   @IsOptional()

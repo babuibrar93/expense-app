@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { SuperAdmin } from 'src/common/constants/super-admin.constant';
 import { OrganizationEntity } from 'src/core/database/entities/organization.entity';
 import { RoleEntity } from 'src/core/database/entities/role.entity';
 import { UserOrganizationRoleEntity } from 'src/core/database/entities/user-organization-role.entity';
@@ -19,24 +20,24 @@ export class SuperAdminSeeder {
     const userOrgRoleRepository = this.dataSource.getRepository(UserOrganizationRoleEntity);
 
     // Check if the Super Admin Role exists
-    let superAdminRole = await roleRepository.findOne({ where: { Name: 'SUPER_ADMIN' } });
+    let superAdminRole = await roleRepository.findOne({ where: { Name: SuperAdmin.roleName } });
 
     if (!superAdminRole) {
-      superAdminRole = roleRepository.create({ Name: 'SUPER_ADMIN' });
+      superAdminRole = roleRepository.create({ Name: SuperAdmin.roleName });
       await roleRepository.save(superAdminRole);
       console.log('Super Admin Role created successfully.');
     }
 
     // Check if the Super Admin User exists
     let superAdminUser = await userRepository.findOne({
-      where: { Email: 'superadmin@example.com' },
+      where: { Email: SuperAdmin.email },
     });
 
     if (!superAdminUser) {
       const hashedPassword = await bcrypt.hash('SuperAdmin@123', 10);
       superAdminUser = userRepository.create({
-        FullName: 'Super Admin',
-        Email: 'superadmin@example.com',
+        FullName: SuperAdmin.name,
+        Email: SuperAdmin.email,
         Password: hashedPassword,
       });
       await userRepository.save(superAdminUser);
@@ -45,13 +46,13 @@ export class SuperAdminSeeder {
 
     // Check if the Default Organization exists
     let defaultOrganization = await organizationRepository.findOne({
-      where: { Name: 'Default Organization', Email: 'superadmin@example.com' },
+      where: { Name: SuperAdmin.organizationName, Email: SuperAdmin.email },
     });
 
     if (!defaultOrganization) {
       defaultOrganization = organizationRepository.create({
-        Name: 'Default Organization',
-        Email: 'superadmin@example.com',
+        Name: SuperAdmin.organizationName,
+        Email: SuperAdmin.email,
       });
       await organizationRepository.save(defaultOrganization);
       console.log('Default Organization created successfully.');

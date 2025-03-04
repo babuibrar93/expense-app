@@ -3,15 +3,21 @@ import { ModuleErrors } from 'src/common/constants/basic.errors';
 import { ModuleRepository } from 'src/common/repositories/module.repository';
 import { ModuleEntity } from 'src/core/database/entities/module.entity';
 import { CreateModuleDto, UpdateModuleDto } from './dtos/module.dto';
+import { UserEntity } from 'src/core/database/entities/user.entity';
 
 @Injectable()
 export class ModuleService {
   constructor(private readonly moduleRepository: ModuleRepository) {}
 
-  async createModule(createModuleDto: CreateModuleDto): Promise<ModuleEntity> {
-    const { Name, ParentId } = createModuleDto;
+  async createModule(
+    createModuleDto: CreateModuleDto,
+    currentUser: UserEntity
+  ): Promise<ModuleEntity> {
+    const { Name, ModuleCode, ParentId } = createModuleDto;
 
-    const alreadyExists = await this.moduleRepository.findOneRecord({ Name });
+    const alreadyExists = await this.moduleRepository.getORMMethods().findOne({
+      where: [{ Name }, { ModuleCode }],
+    });
     if (alreadyExists) throw new BadRequestException(ModuleErrors.MODULE_ALREADY_EXISTS);
 
     let parentModule = null;
@@ -22,16 +28,22 @@ export class ModuleService {
 
     const newModule = this.moduleRepository.getORMMethods().create({
       Name,
+      ModuleCode,
       ParentModule: parentModule,
+      CreatedBy: currentUser,
     });
 
     return await this.moduleRepository.getORMMethods().save(newModule);
   }
 
   async getAllModules(): Promise<ModuleEntity[]> {
-    return await this.moduleRepository.getORMMethods().find({
+    const allModules = await this.moduleRepository.getORMMethods().find({
       relations: ['ParentModule', 'SubModules'],
     });
+
+    const parentModules = allModules?.filter((module) => module.ParentModule === null);
+
+    return parentModules;
   }
 
   async getModuleById(moduleId: string): Promise<ModuleEntity> {

@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { UserOrganizationEntity } from 'src/core/database/entities/user-organization.entity';
 import { GeneralErrors } from '../constants/basic.errors';
+import { SuperAdmin } from '../constants/super-admin.constant';
 import { ApiResponse } from '../dtos/api-response.dto';
 import { UserRepository } from '../repositories/user.repository';
 
@@ -19,21 +20,23 @@ export class OrganizationGuard implements CanActivate {
     let { user, params, body } = request;
     user = await this.userRepository.findOneRecord({ Id: user.Id }, { relations: true });
 
-    if (!user)
-      throw new HttpException(
-        new ApiResponse(false, HttpStatus.UNAUTHORIZED, GeneralErrors.FORBIDDEN_ROLE),
-        HttpStatus.UNAUTHORIZED
-      );
-
     if (!user || !user?.UserOrganization?.length)
       throw new HttpException(
         new ApiResponse(
           false,
-          HttpStatus.UNAUTHORIZED,
+          HttpStatus.FORBIDDEN,
           GeneralErrors.USER_NOT_ASSOCIATED_WITH_ORGANIZATION
         ),
         HttpStatus.FORBIDDEN
       );
+
+    // Allow access if it is Super Admin
+    const isSuperAdmin = user.UserOrganization.some((org: UserOrganizationEntity) =>
+      org.UserOrganizationRole.some((role) => role.Role.Name == SuperAdmin.roleName)
+    );
+    // console.log('current user', JSON.stringify(user, null, 2));
+
+    if (isSuperAdmin) return true;
 
     // IDs of the organization from which user belongs
     const userOrganizationIds = user?.UserOrganization?.map(

@@ -14,7 +14,8 @@ export const GeneralErrors = {
   FORBIDDEN_ROLE: 'Access denied: You do not have the required role to access this resource.',
   FORBIDDEN_PERMISSION: 'Access denied: You do not have the required permissions.',
   ROLE_ORGANIZATION_REQUIRED: 'Both role and organization are required.',
-  USER_NOT_ASSOCIATED_WITH_ORGANIZATION: 'The user is not associated with any organization.',
+  USER_NOT_ASSOCIATED_WITH_ORGANIZATION:
+    'The user is not associated with any organization. Kindly contact your admin',
   USER_NOT_AUTHORIZED_FOR_ORGANIZATION:
     'Access denied: You do not have permission to access this organization.',
 } as const;

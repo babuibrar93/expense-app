@@ -5,12 +5,13 @@ import { AuthModule } from './auth/auth.module';
 import { JwtStrategy } from './auth/strategies/jwt.strategy';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { typeOrmConfig } from './core/config/typeorm.config';
+import { ExpenseSeeder } from './core/database/seeders/expense.seeder';
+import { SuperAdminSeeder } from './core/database/seeders/super-admin.seeder';
+import { ExpenseModule } from './expenses/expenses.module';
 import { ModuleModule } from './modules/modules.module';
 import { OrganizationModule } from './organizations/organizations.module';
 import { RoleModule } from './roles/roles.module';
 import { UserModule } from './users/users.module';
-import { ExpenseModule } from './expenses/expenses.module';
-import { SuperAdminSeeder } from './core/database/seeders/super-admin.seeder';
 
 @Module({
   imports: [
@@ -30,7 +31,7 @@ import { SuperAdminSeeder } from './core/database/seeders/super-admin.seeder';
     ExpenseModule,
     OrganizationModule,
   ],
-  providers: [JwtStrategy, SuperAdminSeeder],
+  providers: [JwtStrategy, SuperAdminSeeder, ExpenseSeeder],
   exports: [SuperAdminSeeder],
 })
 export class AppModule implements NestModule {

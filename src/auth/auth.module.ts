@@ -12,10 +12,6 @@ import { FacebookStrategy } from './strategies/facebook.strategy';
 import { GithubStrategy } from './strategies/github.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { RoleRepository } from 'src/common/repositories/role.repository';
-import { UserOrganizationRepository } from 'src/common/repositories/user-organization.repository';
-import { UserOrganizationRoleRepository } from 'src/common/repositories/user-organization-role.repository';
-import { OrganizationRepository } from 'src/common/repositories/organization.repository';
 
 @Module({
   imports: [
@@ -39,11 +35,7 @@ import { OrganizationRepository } from 'src/common/repositories/organization.rep
     GithubStrategy,
     UserRepository,
     BcryptService,
-    RoleRepository,
-    OrganizationRepository,
-    UserOrganizationRepository,
-    UserOrganizationRoleRepository,
   ],
-  exports: [JwtModule, JwtStrategy, PassportModule],
+  exports: [JwtModule, JwtStrategy, PassportModule, AuthService],
 })
 export class AuthModule {}

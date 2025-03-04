@@ -1,5 +1,6 @@
 import {
   CreateDateColumn,
+  DeleteDateColumn,
   Index,
   JoinColumn,
   ManyToOne,
@@ -25,9 +26,12 @@ export class BaseEntity extends TypeOrmBaseEntity {
   DeletedBy: UserEntity;
 
   @Index()
-  @CreateDateColumn({ name: 'CreatedAt', type: 'datetime2' })
+  @CreateDateColumn({ type: 'datetime2' })
   CreatedAt: Date;
 
-  @UpdateDateColumn({ name: 'UpdatedAt', type: 'datetime2', nullable: true })
+  @UpdateDateColumn({ type: 'datetime2', nullable: true })
   UpdatedAt: Date;
+
+  @DeleteDateColumn({ type: 'datetime2', nullable: true })
+  DeletedAt: Date;
 }

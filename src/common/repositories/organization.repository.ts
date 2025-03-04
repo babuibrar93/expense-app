@@ -15,9 +15,13 @@ export class OrganizationRepository extends BaseRepository<OrganizationEntity> {
 
   async findOneRecord(
     conditions: FindOptionsWhere<OrganizationEntity>,
+    relation?: { relations: boolean },
     request?: any
   ): Promise<OrganizationEntity> {
     const where: FindOptionsWhere<OrganizationEntity> = { ...conditions };
-    return await this.getRepository(request).findOne({ where });
+    const relations = relation?.relations
+      ? ['UserOrganization', 'UserOrganization.User', 'UserOrganization.UserOrganizationRole', 'UserOrganization.UserOrganizationRole.Role']
+      : [];
+    return await this.getRepository(request).findOne({ where, relations });
   }
 }

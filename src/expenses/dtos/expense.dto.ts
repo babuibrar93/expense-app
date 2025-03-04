@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import {
+  IsDate,
   IsEnum,
   IsNotEmpty,
   IsNumber,
@@ -13,78 +14,68 @@ import {
 import { ExpenseStatus } from 'src/common/types/expense.enum';
 
 export class CreateExpenseDto {
-  @ApiProperty({
-    description: 'Title of the expense',
-    example: 'Office Supplies',
-    maxLength: 255,
-  })
-  @IsString()
+  @ApiProperty({ example: 'Office Supplies', description: 'Title of the expense' })
   @IsNotEmpty()
-  @Length(1, 255)
+  @IsString()
   Title: string;
 
   @ApiPropertyOptional({
-    description: 'Detailed description of the expense (optional)',
-    example: 'Purchased printer cartridges',
-    maxLength: 500,
-    required: false,
+    example: 'Purchased printer for office use',
+    description: 'Description of the expense',
   })
-  @IsString()
   @IsOptional()
-  @Length(0, 500)
+  @IsString()
   Description?: string;
 
-  @ApiProperty({
-    description: 'Amount spent on the expense',
-    example: 150.75,
-  })
+  @ApiProperty({ example: 1500.75, description: 'Amount of the expense' })
   @IsNotEmpty()
-  @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0.01)
-  @Max(9999999999.99) // Prevents unrealistic amounts
+  @IsNumber()
   Amount: number;
 
-  @ApiProperty({
-    description: 'Currency in which the expense is recorded',
-    example: 'USD',
-    maxLength: 50,
-  })
-  @IsString()
+  @ApiProperty({ example: 'USD', description: 'Currency of the expense' })
   @IsNotEmpty()
-  @Length(1, 50)
+  @IsString()
   Currency: string;
 
   @ApiProperty({
-    description: 'Date when the expense was made',
-    example: '2024-02-27',
+    example: '2025-02-27',
+    description: 'Date of the expense',
+    type: String,
+    format: 'date',
   })
   @IsNotEmpty()
+  @IsDate()
   ExpenseDate: Date;
 
-  @ApiProperty({
-    description: 'Category of the expense',
-    example: 'Office Supplies',
-    maxLength: 100,
-  })
-  @IsString()
-  @IsNotEmpty()
-  @Length(1, 100)
-  Category: string;
-
   @ApiPropertyOptional({
-    description: 'Status of the expense',
-    example: ExpenseStatus.PENDING,
     enum: ExpenseStatus,
-    default: ExpenseStatus.PENDING,
+    example: ExpenseStatus.PENDING,
+    description: 'Status of the expense',
   })
-  @IsEnum(ExpenseStatus)
   @IsOptional()
+  @IsEnum(ExpenseStatus)
   Status?: ExpenseStatus;
 
-  @ApiProperty({ description: 'Organization ID', example: 'b5fcb3a2-3c50-4f94-bf65-d2e9d9a4ebf7' })
-  @IsUUID()
+  @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000', description: 'Organization ID' })
   @IsNotEmpty()
+  @IsUUID()
   OrganizationId: string;
+
+  @ApiProperty({
+    example: '660e8400-e29b-41d4-a716-446655440000',
+    description: 'Type ID (Expense or Revenue)',
+  })
+  @IsNotEmpty()
+  @IsUUID()
+  TypeId: string;
+
+  @ApiProperty({
+    example: '770e8400-e29b-41d4-a716-446655440000',
+    description: 'Category ID of the expense',
+  })
+  @IsNotEmpty()
+  @IsUUID()
+  CategoryId: string;
 }
 
 export class UpdateExpenseDto extends PartialType(CreateExpenseDto) {}

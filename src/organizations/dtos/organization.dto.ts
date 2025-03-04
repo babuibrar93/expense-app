@@ -22,6 +22,14 @@ export class CreateOrganizationDto {
   Phone: string;
 
   @ApiPropertyOptional({
+    example: 'Lahore, Punjab, Pakistan',
+    description: 'Adress of the organization',
+  })
+  @IsString()
+  @IsOptional()
+  Address: string;
+
+  @ApiPropertyOptional({
     example: 'Software Development Company',
     description: 'Description of the organization',
     required: false,

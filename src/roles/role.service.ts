@@ -8,8 +8,9 @@ import { RoleModuleRepository } from 'src/common/repositories/role-module.reposi
 import { RoleRepository } from 'src/common/repositories/role.repository';
 import { RoleEntity } from 'src/core/database/entities/role.entity';
 import { UserEntity } from 'src/core/database/entities/user.entity';
-import { In } from 'typeorm';
+import { In, Not } from 'typeorm';
 import { AssignModulesToRoleDto, CreateRoleDto, updateRoleDto } from './dtos/roles.dto';
+import { SuperAdmin } from 'src/common/constants/super-admin.constant';
 
 @Injectable()
 export class RoleService {
@@ -31,7 +32,9 @@ export class RoleService {
   }
 
   async getAll(): Promise<RoleEntity[]> {
-    return this.roleRepository.getORMMethods().find();
+    return this.roleRepository.getORMMethods().find({
+      where: { Name: Not(SuperAdmin.roleName) },
+    });
   }
 
   async getRoleById(Id: string): Promise<RoleEntity> {

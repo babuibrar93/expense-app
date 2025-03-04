@@ -9,3 +9,8 @@ export enum ExpenseFilter {
   MONTH = 'MONTH',
   YEAR = 'YEAR',
 }
+
+export enum ExpenseTypeEnum {
+  EXPENSE = 'EXPENSE',
+  REVENUE = 'REVENUE',
+}
